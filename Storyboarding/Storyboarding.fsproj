@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Tools\SbTypes.fs" />
+        <Compile Include="Tools\Resources.fs" />
+        <Compile Include="Tools\SbMonad.fs" />
+        <Compile Include="Tools\SbRandom.fs" />
+        <Compile Include="Tools\ImageFilters.fs" />
+        <Compile Include="Tools\TextUtils.fs" />
+        <Compile Include="Tools\SbCompiler.fs" />
+        <Compile Include="Tools\GeometryUtils.fs" />
+        <Compile Include="Effects\Background.fs" />
+        <Compile Include="Effects\SbFFT.fs" />
+        <Compile Include="Effects\RealisticSparks.fs" />
+        <Compile Include="Effects\Transition.fs" />
+        <Compile Include="Effects\RisingSmoke.fs" />
+        <Compile Include="Effects\PerNoteEffect.fs" />
+        <Compile Include="Effects\SquareFading.fs" />
+        <Compile Include="Gameplay\Util.fs" />
+        <Compile Include="Gameplay\Lines.fs" />
+        <Compile Include="Gameplay\Bubbles.fs" />
+        <Compile Include="Storyboards\Honestly.fs" />
+        <Compile Include="Storyboards\Lamprey.fs" />
+        <Compile Include="Storyboards\TheWordsINeverSaid.fs" />
+        <Compile Include="Storyboards\WithABurningHeart.fs" />
+        <Compile Include="Storyboards\M.fs" />
+        <Compile Include="Program.fs" />
+        <Folder Include="Scripts\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Delaunator\Delaunator.csproj" />
+      <ProjectReference Include="..\MapsetParser\MapsetParser.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NAudio" Version="2.2.1" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
+      <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
+      <PackageReference Include="Spectrogram" Version="1.6.1" />
+      <PackageReference Include="System.Windows.Extensions" Version="9.0.6" />
+    </ItemGroup>
+
+</Project>
