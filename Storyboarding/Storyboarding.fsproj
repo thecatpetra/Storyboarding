@@ -21,14 +21,17 @@
         <Compile Include="Effects\RisingSmoke.fs" />
         <Compile Include="Effects\PerNoteEffect.fs" />
         <Compile Include="Effects\SquareFading.fs" />
+        <Compile Include="Effects\FFTEffects.fs" />
         <Compile Include="Gameplay\Util.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />
+        <Compile Include="Gameplay\Isolation\Util.fs" />
         <Compile Include="Storyboards\Honestly.fs" />
         <Compile Include="Storyboards\Lamprey.fs" />
         <Compile Include="Storyboards\TheWordsINeverSaid.fs" />
         <Compile Include="Storyboards\WithABurningHeart.fs" />
         <Compile Include="Storyboards\M.fs" />
+        <Compile Include="Storyboards\Isolation.fs" />
         <Compile Include="Program.fs" />
         <Folder Include="Scripts\" />
     </ItemGroup>

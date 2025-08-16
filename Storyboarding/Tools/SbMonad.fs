@@ -91,8 +91,8 @@ module SbMonad =
         | None -> f (def ()) sb
 
     let move = iBasic<Position> InstructionType.Move
-    let movex = iBasic<int> InstructionType.MoveX
-    let movey = iBasic<int> InstructionType.MoveY
+    let movex = iBasic<int32> InstructionType.MoveX
+    let movey = iBasic<int32> InstructionType.MoveY
     let fade = iBasic<float32> InstructionType.Fade
     let rotate = iBasic<float32> InstructionType.Rotate
     let scale = iBasic<float32> InstructionType.Scale
@@ -101,8 +101,10 @@ module SbMonad =
     let blur = iBasic<float32> InstructionType.Blur
     let easing e = applyToLastInstruction (fun i -> {i with easing = e })
     let layer l = applyToLastSprite (fun i -> {i with layer = l })
+    let origin o = applyToLastSprite (fun i -> {i with origin = o })
 
     let vectorScaleTo a b d = (retrieveLastTo InstructionType.VectorScale) (fun () -> (0f, 0f)) (fun c -> vectorScale a b (c :?> fPosition) d)
+    let scaleTo a b d =(retrieveLastTo InstructionType.Scale) (fun () -> 0f) (fun c -> scale a b (c :?> float32) d)
     let fadeTo a b d = (retrieveLastTo InstructionType.Fade) (fun () -> 0f) (fun c -> fade a b (c :?> float32) d)
 
     let scaleAsBg timeStart timeStop (sb : SB) =
@@ -128,11 +130,11 @@ module SbMonad =
     let verticalFlip = parameter "V"
 
     let img resource =
-        let i = { name = resource; layer = Layer.Background; difficulty = None; instructions = [] }
+        let i = { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center }
         addSprite i
 
     let pureSprite resource =
-        { name = resource; layer = Layer.Background; difficulty = None; instructions = [] }
+        { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center }
 
     let diffSpecific diff =
         applyToLastSprite (fun s -> { s with difficulty = Some(diff) })
@@ -155,11 +157,14 @@ module SbMonad =
         let anyBm = sb.beatmapSet.beatmaps |> Seq.cast<Beatmap> |> Seq.head
         anyBm.timingLines |> Seq.filter (fun x -> x.offset < time) |> Seq.last |> _.msPerBeat |> abs |> int
 
-    let timeDivisionMap (timeStart : Time) (timeEnd : Time) (duration: Time) =
+    let timeDivisionMapi (timeStart : Time) (timeEnd : Time) (duration: Time) =
         let segmentCount = timeEnd - timeStart |> fun diff -> diff / duration
         let genSegment i = (i * duration + timeStart, (i + 1) * duration + timeStart)
         let segments = [ for i in 0..segmentCount -> genSegment i]
-        monadicMap segments
+        monadicMapi segments
+
+    let timeDivisionMap (timeStart : Time) (timeEnd : Time) (duration: Time) f =
+        timeDivisionMapi timeStart timeEnd duration (fun _ -> f)
 
     let t (x : string) =
         let [|m; s; ms|] = x.Split(":")

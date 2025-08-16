@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Storyboards
 
+open System
 open System.Numerics
 open MapsetParser.objects
 open Microsoft.FSharp.Linq
@@ -16,19 +17,6 @@ module WithABurningHeart =
     // Fine map but i hate ranked
     let bad = @"C:\Users\arthur\AppData\Local\osu!\Songs\2182276 DragonForce - Burning Heart\DragonForce - Burning Heart (Maaadbot).osb"
     let path = @"C:\Users\arthur\AppData\Local\osu!\Songs\2388814 DragonForce - Burning Heart (feat Alissa White-Gluz)\DragonForce - Burning Heart (feat. Alissa White-Gluz) (Rose Winters).osb"
-
-    let rayEffect =
-        let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
-        forEachHitObject (fun ho ->
-        let rotation = (float32 (ho.Position.X - 256f)) / 800f
-        img grad_ray
-        >>= layer Layer.Foreground
-        >>= move (int ho.time) (int ho.time) (p ho.Position) (p ho.Position)
-        >>= vectorScale (int ho.time) (int ho.time) (3f, 20f) (3f, 20f)
-        >>= fade (int ho.time) (int ho.time + 2000) 0.3f 0f
-        >>= rotate (int ho.time) (int ho.time) rotation rotation
-        >>= alpha
-        >>= color (int ho.time) (int ho.time) (randColor()) (sameColor()))
 
     let introSection =
         let sectionEnd = t "00:10:080"
@@ -84,6 +72,12 @@ module WithABurningHeart =
         TextUtils.text font_monosans txt effect position scale)
 
     let pingGen (ho : HitObject) =
+        let isNewCombo = ho.``type`` &&& HitObject.Type.NewCombo = HitObject.Type.NewCombo
+        match isNewCombo with
+        | true -> PerNoteEffect.pingParamsOfColor (200, 190, 180) ()
+        | _ -> None
+
+    let rayGen (ho : HitObject) =
         let isNewCombo = ho.``type`` &&& HitObject.Type.NewCombo = HitObject.Type.NewCombo
         match isNewCombo with
         | true -> PerNoteEffect.pingParamsOfColor (200, 190, 180) ()
@@ -184,9 +178,8 @@ module WithABurningHeart =
                       t "01:50:346", "Genocide"
                       t "01:51:946", "Now it's time to say"
                       t "01:53:280", "Your last goodbyes"]
-        background bg_burning_city timeStart timeEnd
-        >>= bgMovement timeStart (timeEnd + 300)
-        >>= color timeStart timeStart (192, 192, 192) (192, 192, 192)
+        background bg_burning_city timeStart (timeEnd + 1300)
+        >>= bgMovement timeStart (timeEnd + 1500)
         >>= stdLyrics2 lyrics
         >>= RisingSmoke.effect timeStart timeEnd
         >>= RealisticSparks.effect soloStart timeEnd
@@ -194,8 +187,81 @@ module WithABurningHeart =
         >>= PerNoteEffect.pingEffect pingGen soloStart timeEnd
         >>= Transition.dim timeEnd nextSection 100
 
-    let fftSquares timeStart timeEnd =
-        squareFadeSequence timeStart timeEnd
+    let ascendingShapes timeStart timeEnd sb =
+        let step = beatTime timeStart sb |> (*) 3 |> (*) 4
+        let amount = 30
+        monadicMap [1..4] (fun l ->
+        monadicMap [1..amount] (fun s ->
+        let x = randX ()
+        let bottomColor = (230, 67, 55)
+        let topColor = (79, 76, 176)
+        let initialPosition = x, 380 + randInt 0 200 + 100 * l
+        let endPosition = x + (x - 320) * 2, -120 - 100 * l
+        let behaviour =
+            alpha
+            >>= timeDivisionMapi (timeStart + s * step) (timeStart + (s + 14) * step) step (fun i (ts, te) ->
+            let ts, te = ts + (s % 2) * step / 2, te + (s % 2) * step / 2
+            let lp = (float32 i) / 15f
+            let lc = (float32 i + 1f) / 15f
+            let prev = lerp initialPosition endPosition lp
+            let current = lerp initialPosition endPosition lc
+            let prevColor = lerpColor bottomColor topColor (lp |> (*) 3f |> fun x -> (-) x 1f |> min 1f |> max 0f)
+            let currColor = lerpColor bottomColor topColor (lc |> (*) 3f |> fun x -> (-) x 1f |> min 1f |> max 0f)
+            color ts te prevColor currColor
+            >>= move ts te prev current
+            >>= easing Easing.QuartOut
+            >>= rotate ts te 0f (MathF.PI / 2f - MathF.PI * float32 (s % 2))
+            >>= easing Easing.QuartOut)
+        img square_white
+        >>= scale timeStart timeEnd (0.1f * (float32 l)) (0.1f * (float32 l))
+        >>= fade timeStart timeEnd (0.1f * (float32 l)) (0.1f * (float32 l))
+        >>= behaviour
+        >> img light
+        >>= scale timeStart timeEnd (0.2f * (float32 l)) (0.2f * (float32 l))
+        >>= fade timeStart timeEnd (0.2f * (float32 l)) (0.2f * (float32 l))
+        >>= behaviour)) sb
+
+    let soloSection1 =
+        let timeStart, timeEnd = (t "02:47:946"), (t "03:57:279")
+        let blurred = bg_desert_sunset |> ImageFilters.gaussBlur 5f
+        background bg_desert_sunset timeStart timeEnd
+        >> background blurred timeStart (t "02:57:546")
+        >>= fade (t "02:47:946") (t "02:57:546") 1f 0f
+        >>= ascendingShapes (t "03:07:146") (t "03:55:146")
+        >>= PerNoteEffect.circleEffect (PerNoteEffect.lightParamsOfColor (255, 231, 110)) (t "03:26:346") timeEnd
+        >>= PerNoteEffect.pingEffect pingGen (t "03:26:346") timeEnd
+        >>= FFTEffects.circleFft timeStart timeEnd
+        >>= Transition.chromoFlash (t "03:55:946") (t "03:57:279") (t "03:57:279") 1000
+        >>= Transition.chromoFlash (t "03:55:946") (t "03:57:279") (t "03:57:279") 1000
+
+    let soloSection2 =
+        let timeStart, timeEnd = (t "03:57:279"), (t "04:47:412")
+        let blurred = bg_mountains_sunset |> ImageFilters.gaussBlur 5f
+        let comboGrad = [0..20] |> Seq.map float32 |> Seq.map ((*) 0.05f) |> Seq.map (lerpColor (230, 67, 55) (79, 76, 176)) |> Seq.toList
+        background bg_mountains_sunset timeStart timeEnd
+        >> background blurred timeStart (t "03:59:412")
+        >>= fade timeStart (t "03:59:412") 1f 0f
+        >>= PerNoteEffect.circleEffect (PerNoteEffect.lightParamsOfColors comboGrad) (t "03:57:279") timeEnd
+        >>= PerNoteEffect.pingEffect pingGen (t "03:57:279") timeEnd
+        >>= FFTEffects.bottomFft timeStart timeEnd
+        >>= PerNoteEffect.rayEffect (PerNoteEffect.lightParamsOfColors comboGrad) (t "03:57:279") timeEnd
+        >>= Transition.chromoFlash (t "04:45:346") (t "04:46:879") (t "04:47:412") 5000
+        >>= Transition.chromoFlash (t "04:45:879") (t "04:47:412") (t "04:47:412") 5000
+
+    let chillSection =
+        let lyrics = [ t "04:55:946", "Dark minds, hearts of fire";
+                       t "04:58:079", "Prisoners of this city";
+                       t "05:00:479", "In the world alone";
+                       t "05:02:346", "Find a way to escape" ]
+        let slightlyBlurred = bg_campfire |> ImageFilters.gaussBlur 25f
+        let blurred = bg_campfire |> ImageFilters.gaussBlur 55f
+        background bg_campfire (t "04:47:412") (t "05:04:746")
+        >> background blurred (t "04:47:412") (t "04:51:679")
+        >>= fade (t "04:47:412") (t "04:53:679") 1f 0f
+        >> background slightlyBlurred (t "04:47:412") (t "04:55:946")
+        >>= fade (t "04:51:679") (t "04:55:946") 1f 0f
+        >>= PerNoteEffect.pingEffect pingGen (t "05:02:346") (t "05:04:746")
+        >>= stdLyrics lyrics
 
     let story =
         introSection
@@ -206,8 +272,10 @@ module WithABurningHeart =
         >>= lyricsSection2
         >>= burningHeart (t "02:03:413")
         >>= chorus (t "02:20:480") (t "02:47:946" - t "02:45:813")
-        // exp
-        >>= fftSquares (t "02:47:946") (t "03:55:146")
+        >>= soloSection1
+        >>= soloSection2
+        >>= chillSection
+        >>= burningHeartFinal
 
     let make () =
         openSb path

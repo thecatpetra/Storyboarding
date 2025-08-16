@@ -38,87 +38,26 @@ module SbCompiler =
             .AppendLine("//Storyboard Sound Samples")
             .ToString()
 
-    // let rec resolveCustomCommands sb =
-    //     let sectionFadesOfBlur x =
-    //         match x with
-    //         | x when x < 0.2f -> (1f - x / 0.2f, x / 0.2f, 0f, 0f)
-    //         | x when x < 0.4f -> (0f, 1f - (x - 0.2f) / 0.2f, (x - 0.2f) / 0.2f, 0f)
-    //         | x when x < 1f -> (0f, 0f, 1f - (x - 0.4f) / 0.6f, (x - 0.4f) / 0.6f)
-    //         | _ -> (0f, 0f, 0f, 1f)
-    //     let regions = [0.0f, 0.2f; 0.2f, 0.4f; 0.4f, 1.0f]
-    //     let splitIntoInstructions tFrom tTo iFrom iTo =
-    //         let timeLen = abs(tFrom - tTo)
-    //         let valueLen = abs(iFrom - iTo)
-    //         let rec innerForward tFrom tTo iFrom iTo left =
-    //             match left with
-    //             | (_, ie) :: tl when iFrom < ie ->
-    //                 // Inside interval
-    //                 let newTFrom = tFrom - (iFrom - ie) / valueLen * timeLen
-    //                 (tFrom, newTFrom, iFrom, ie) :: innerForward newTFrom tTo ie iTo tl
-    //             | _ :: tl -> innerForward tFrom tTo iFrom iTo tl
-    //             | [] -> []
-    //         let innerBackwards tFrom tTo iFrom iTo left =
-    //             innerForward tFrom tTo (1f - iFrom) (1f - iTo) left |> List.map (fun (a, b, c, d) -> (a, b, 1f - c, 1f - d))
-    //         innerForward tFrom tTo iFrom iTo regions @ innerBackwards tFrom tTo iFrom iTo regions
-    //
-    //
-    //     let isOsbInstruction t =
-    //         match t.typ with
-    //         | Move
-    //         | Scale
-    //         | Rotate
-    //         | VectorScale
-    //         | Parameter
-    //         | Fade
-    //         | Color -> true
-    //         | _ -> false
-    //     let resolveCustomCommand (sprites : Sprite list) (i : Instruction) =
-    //         match i.typ with
-    //         | Blur ->
-    //             let instructions = splitIntoInstructions (float32 i.timeStart) (float32 i.timeEnd) (i.iFrom :?> float32) (i.iTo :?> float32)
-    //             let neededSprites = [
-    //                 sprites;
-    //                 List.map (fun s -> pureSprite (gaussBlur 5f s.name)) sprites;
-    //                 List.map (fun s -> pureSprite (gaussBlur 25f s.name)) sprites;
-    //                 List.map (fun s -> pureSprite (gaussBlur 100f s.name)) sprites
-    //             ]
-    //             let instructionsPerLayer = ResizeArray<ResizeArray<Instruction>>(Seq.init 4 (fun _ -> ResizeArray<Instruction>()))
-    //             let newSprites = instructions |> List.collect (fun segment ->
-    //                 match segment with
-    //                 | ts, te, f, t when 0f < (f + t) / 2f && (f + t) / 2f <= 0.4f ->
-    //                     instructionsPerLayer[0].Add(fade (int ts) (int te) f t)
-    //                 | _, _, _, _ -> failwith "Blur outside of [0; 1]")
-    //             newSprites
-    //         | GrayScale -> failwith "TODO"
-    //         | _ -> sprites
-    //     let inner (sprite : Sprite) =
-    //         let pureInstructions = sprite.instructions |> Seq.filter isOsbInstruction
-    //         let customInstructions = sprite.instructions |> Seq.filter (isOsbInstruction >> not)
-    //         Seq.fold resolveCustomCommand [sprite] customInstructions
-    //     {sb with sprites = sb.sprites |> List.collect inner}
-
     let renderSpritesSubset sprites =
         let builder = StringBuilder()
-        let layer =
-            function
+        let layer = function
             | Background -> "Background"
             | Foreground -> "Foreground"
             | Overlay -> "Overlay"
+        let origin = function
+            | Origin.Center -> "Centre"
+            | Origin.BottomCentre -> "BottomCentre"
+            | Origin.TopCentre -> "TopCentre"
         let writeInstruction (i : Instruction) =
             let formatPosition (x, y) = $"{x},{y}"
-            let formatColor (r, g, b) = $"{r},{g},{b}"
-            let formatEasing =
-                function
-                | Easing.None -> 0
-                | Easing.In -> 1
-                | Easing.Out -> 2
-                | Easing.InOut -> 3
-                | Easing.QuartIn -> 9
-                | Easing.QuartOut -> 10
-                | Easing.SineIn -> 15
-                | Easing.SineOut -> 16
-                | Easing.SineInOut -> 17
-                | _ -> System.ArgumentOutOfRangeException() |> raise
+            let formatColor (r, g, b) =
+                assert (r >= 0 && r < 256)
+                assert (g >= 0 && g < 256)
+                assert (b >= 0 && b < 256)
+                $"{int r},{int g},{int b}"
+            let formatEasing (e: Easing) =
+                assert(Easing.GetValues() |> Seq.contains e)
+                int32 e
             let inner code p1 p2 =
                 builder.AppendLine($" {code},{formatEasing i.easing},{i.timeStart},{i.timeEnd},{p1},{p2}") |> ignore
             let innerParameter code p1 =
@@ -135,7 +74,7 @@ module SbCompiler =
             | Color -> inner "C" (formatColor (i.iFrom :?> Color)) (formatColor (i.iTo :?> Color))
             | _ -> failwith "Unsupported command for direct compilation"
         let writeSprite (s : Sprite) =
-            builder.AppendLine($"Sprite,{layer s.layer},Centre,\"s/{s.name}\",320,240") |> ignore
+            builder.AppendLine($"Sprite,{layer s.layer},{origin s.origin},\"s/{s.name}\",320,240") |> ignore
             s.instructions |> Seq.rev |> Seq.iter writeInstruction
         sprites |> Seq.rev |> Seq.iter writeSprite
         builder.ToString()
@@ -170,3 +109,4 @@ module SbCompiler =
         File.WriteAllText(sb.path, renderSpritesSubset nonDiffSpecific |> insertIntoComments)
 
 
+    let inline (!>) (x:^a) : ^b = ((^a or ^b) : (static member op_Implicit : ^a -> ^b) x)

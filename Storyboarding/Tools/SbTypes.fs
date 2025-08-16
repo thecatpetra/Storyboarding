@@ -9,12 +9,18 @@ module SbTypes =
         | None = 0
         | In = 1
         | Out = 2
-        | InOut = 3
+        | QuadIn = 3
+        | QuadOut = 4
         | QuartIn = 9
         | QuartOut = 10
         | SineIn = 15
         | SineOut = 16
         | SineInOut = 17
+        | BounceIn = 32
+        | BounceOut = 33
+        | BounceInOut = 34
+
+    type Origin = Center | BottomCentre | TopCentre
 
     type Layer = Background | Foreground | Overlay
 
@@ -45,6 +51,7 @@ module SbTypes =
     type Sprite = {
         name: string
         layer: Layer
+        origin: Origin
         difficulty: Beatmap option
         instructions: Instruction list
     }
@@ -60,6 +67,11 @@ module SbTypes =
 
     let lerpTime (first: int) (second: int) (p : float32) =
         ((float32 first) * (1f - p) + (float32 second) * p) |> int
+
+    let lerpColor (first : Color) (second : Color) (p : float32) =
+        let fr, fg, fb = first
+        let sr, sg, sb = second
+        lerpTime fr sr p, lerpTime fg sg p, lerpTime fb sb p
 
     let inline elementWise op first second =
         (second |> fst, first |> fst) ||> op, (second |> snd, first |> snd) ||> op
