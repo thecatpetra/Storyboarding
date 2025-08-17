@@ -12,7 +12,7 @@ open Storyboarding.Tools.SbTypes
 
 module Background =
     let getOptimalSize filename =
-        let fullPath = Path.Join(Resources.resourcesFolder, filename)
+        let fullPath = Path.Join(Paths.resourcesFolder, filename)
         use image = Image.Load(fullPath)
         880f / (float32 image.Width)
 
@@ -35,23 +35,21 @@ module Background =
         |> List.map Seq.toList
         |> List.map (fun [a; b; c] -> (pointToPosition a, pointToPosition b, pointToPosition c))
 
-    let bgMovement (timeStart : Time) (timeEnd : Time) sb =
+    let bgLayerMovement (timeStart : Time) (timeEnd : Time) amplitude sb =
         let beat = beatTime timeStart sb
-        let iterationTime = beat * 64
-        let iterations = (timeEnd - timeStart) / iterationTime |> int
-        let stride = 20f
-        let angleDiff = 1.5f
-        let mutable prevMovePosition = (320, 240)
-        let currentSprite = getCurrentSprite sb
-        let size = getOptimalSize currentSprite |> (*) 1.15f
-        (scale (timeStart + 1) (timeStart + 1) size size
-        >>= monadicMap [0..iterations] (fun i ->
-        let fi = float32 i
-        let stride = (stride * MathF.Sin(fi * angleDiff) |> int, stride * MathF.Cos(fi * angleDiff) |> int)
-        let nextMovePosition = (320, 240) +++ stride
-        let iterStart = i * iterationTime + timeStart
-        let iterEnd = (i + 1) * iterationTime + timeStart
-        let r = move iterStart iterEnd prevMovePosition nextMovePosition  >>= easing Easing.SineInOut
-        prevMovePosition <- nextMovePosition
-        r)) sb
+        let iterationTime = beat * 32
+        let rotateDiff = 0.03f
+        let iteration i (ts, te) =
+            let position = float32 >> (*) 3.2f >> (+) 1.7f >> (fun i -> MathF.Cos(i) * amplitude |> int, MathF.Sin(i) * amplitude |> int) >> (+++) (320, 240)
+            let rotation i = i % 2 |> float32 |> (-) 0.5f |> (*) rotateDiff
+            rotate ts te (rotation i) (rotation <| i + 1)
+            >> easing Easing.QuadInOut
+            >>= move ts te (position i) (position <| i + 1)
+            >> easing Easing.QuadInOut
+        timeDivisionMapi timeStart timeEnd iterationTime iteration sb
 
+    let bgMovement (timeStart : Time) (timeEnd : Time) =
+        bgLayerMovement timeStart timeEnd 8f
+
+    let parallax (ts : Time) (te : Time) sprites =
+        monadicMap sprites (fun (sprite, amplitude) -> background sprite ts te >> bgLayerMovement ts te amplitude)

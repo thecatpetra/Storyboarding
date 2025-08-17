@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Effects
 
+open System
 open System.Numerics
 open MapsetParser.objects
 open Storyboarding.Tools
@@ -20,6 +21,25 @@ module PerNoteEffect =
         color: Color
         alpha: bool
     }
+
+    let isNewCombo (ho : HitObject) =
+        ho.``type`` &&& HitObject.Type.NewCombo = HitObject.Type.NewCombo
+
+    let onlyFirstCombo f (ho : HitObject) =
+        if isNewCombo ho then f ho else None
+
+    let lightParamOfCombo (ho : HitObject) : LightParam option =
+        // very unoptimal (i dont care though)
+        let comboSkip (ho : HitObject) =
+            ((ho.``type`` |> int) &&& 112 >>> 4) + 1
+        let colors = ho.beatmap.colourSettings.combos
+        let maxIndex = colors |> Seq.length
+        let selfIndex = ho.GetHitObjectIndex()
+        let index = ho.beatmap.hitObjects
+                    |> Seq.take (selfIndex + 1)
+                    |> Seq.filter isNewCombo
+                    |> Seq.fold (fun c h -> (c + comboSkip h) % maxIndex) 0
+        Some { startSize = 1.5f; endSize = 1.2f; lightColor = Seq.item index colors |> (fun v -> (v.X |> int, v.Y |> int, v.Z |> int)); alpha = true }
 
     let lightParamsOfColors cs (ho : HitObject) : LightParam option =
         assert (cs <> [])
@@ -73,4 +93,21 @@ module PerNoteEffect =
             >>= rotate (int ho.time) (int ho.time) rotation rotation
             >>= alpha
             >>= color (int ho.time) (int ho.time) eff.lightColor eff.lightColor
+        | _ -> id)
+
+    let doubleRayEffect (parameters : HitObject -> LightParam option) timeStart timeEnd =
+        let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
+        forEachHitObject (fun ho ->
+        match parameters ho with
+        | Some eff when ho.time >= timeStart && ho.time < timeEnd ->
+            let r = -MathF.PI / 2f + 0.05f
+            let offset = r * 80f * MathF.Cos(r) |> int, r * 80f * MathF.Sin(r) |> int
+            monadicMap [-1; 1] (fun d ->
+            img Resources.glow_ray_rotated >>= layer Layer.Foreground
+            >>= move (int ho.time) (int ho.time + 450) (p ho.Position) (p ho.Position |> (+++) (d *** offset)) >> easing Easing.In
+            >>= vectorScale (int ho.time) (int ho.time) (0.2f, 1.7f) (0.2f, 1.7f)
+            >>= fade (int ho.time) (int ho.time + 450) 0.4f 0f
+            >>= rotate (int ho.time) (int ho.time) r r
+            >>= alpha
+            >>= color (int ho.time) (int ho.time) eff.lightColor eff.lightColor)
         | _ -> id)

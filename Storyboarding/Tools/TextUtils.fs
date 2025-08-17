@@ -2,6 +2,7 @@
 
 open System.Diagnostics
 open System.IO
+open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
 open SbMonad
 open System.Drawing
@@ -13,6 +14,18 @@ module TextUtils =
         let saveFolder = Path.Join(savePathPrefix, FileInfo(font).Name)
         Directory.CreateDirectory(saveFolder) |> ignore
         let args = [|Path.Join(scriptPath, "font_renderer.py"); font; saveFolder; size.ToString()|] |> Seq.ofArray
+        let p = Process.Start("ffpython", args)
+        printf $"Generating font {font} with size {size}"
+        p.WaitForExit()
+        let args = [|Path.Join(scriptPath, "font_transparent.py"); saveFolder |] |> Seq.ofArray
+        let p = Process.Start("python3", args)
+        printf $"making font {font} transparent"
+        p.WaitForExit()
+
+    let createFontSubset font subset size =
+        let saveFolder = Path.Join(savePathPrefix, FileInfo(font).Name)
+        Directory.CreateDirectory(saveFolder) |> ignore
+        let args = [|Path.Join(scriptPath, "font_subset_renderer.py"); font; saveFolder; size.ToString(); subset|] |> Seq.ofArray
         let p = Process.Start("ffpython", args)
         printf $"Generating font {font} with size {size}"
         p.WaitForExit()
@@ -84,24 +97,25 @@ module TextUtils =
     let neonInOut stay time (c1 : SbTypes.Color) (c2 : SbTypes.Color) : CharAction = fun i image s p ->
         let blurred = image |> gaussBlur 6f
         let dIn = SbRandom.rng.Next(0, 200)
-        let dOut = SbRandom.rng.Next(0, 500)
+        let dOut = SbRandom.rng.Next(0, 600)
         img blurred
         >>= move time time p p
         >>= scale time time s s
-        >>= fade (time) (time + dIn) 0f 1f
+        >>= fade (time + dIn) (time + dIn + 200) 0f 1f
         >>= fade (time + stay) (time + stay + dOut) 1f 0f
         >>= color time time c2 c2
         >>= alpha
         >> img image
         >>= move time time p p
         >>= scale time time s s
-        >>= fade (time) (time + dIn) 0f 1f
+        >>= fade (time + dIn) (time + dIn + 200) 0f 1f
         >>= fade (time + stay) (time + stay + dOut) 1f 0f
         >>= color time time c1 c1
         >>= alpha
 
     let centreOfText font (txt : string) (scale : float32) =
         let unicodes = txt |> Seq.toList |> List.map int
+        printfn $"Rendering text {txt}"
         ensureFont font
         let listFolder acc e =
             let image = Path.Join(font, $"{e}.png")

@@ -9,7 +9,7 @@ module Transition =
     // Defaults: fadeTime = 100
     let dim startTime endTime fadeTime =
         let allScreenScale = 10f
-        img Resources.square_black
+        img square_black
         >>= scale startTime startTime allScreenScale allScreenScale
         >>= fade startTime (startTime + fadeTime) 0f 1f
         >>= fade endTime endTime 1f 0f
@@ -37,32 +37,14 @@ module Transition =
         >>= alpha
         >>= color timeStart timeStart (0, 255, 0) (0, 255, 0)
         >>= fade endFin (endFin + stay) 1f 0f
-    // easing = 4
-    // rotation = 0.4
-    // red = "255,0,0"
-    // green = "0,255,0"
-    // blue = "0,0,255"
-    // c_offset = 50
-    // osb.write(f"Sprite,Foreground,BottomCentre,\"{gradient}\",240,650\n")
-    // osb.write(f" F,{easing},{start},{_end},0,1\n")
-    // osb.write(f" V,{easing},{start},{_end},18,0,18,30\n")
-    // osb.write(f" R,0,{start},{start},{rotation},{rotation}\n")
-    // osb.write(f" P,0,0,0,A\n")
-    // osb.write(f" C,0,{start},{start},{green},{green}\n")
-    // osb.write(f" F,{easing},{_end},{_end + 1200},1,0\n")
-    //
-    // osb.write(f"Sprite,Foreground,BottomCentre,\"{gradient}\",480,650\n")
-    // osb.write(f" F,{easing},{start},{_end},0,1\n")
-    // osb.write(f" V,{easing},{start + c_offset},{_end},18,0,18,30\n")
-    // osb.write(f" R,0,{start},{start},{-rotation},{-rotation}\n")
-    // osb.write(f" P,0,0,0,A\n")
-    // osb.write(f" C,0,{start},{start},{blue},{blue}\n")
-    // osb.write(f" F,{easing},{_end},{_end + 1200},1,0\n")
-    //
-    // osb.write(f"Sprite,Foreground,BottomCentre,\"{gradient}\",360,650\n")
-    // osb.write(f" F,{easing},{start},{_end},0,1\n")
-    // osb.write(f" V,{easing},{start + 2 * c_offset},{_end},18,0,18,30\n")
-    // osb.write(f" R,0,{start},{start},{0},{0}\n")
-    // osb.write(f" P,0,0,0,A\n")
-    // osb.write(f" C,0,{start},{start},{red},{red}\n")
-    // osb.write(f" F,{easing},{_end},{_end + 1200},1,0\n")
+
+    let blackCurtains dimStart dimEnd openStart openEnd =
+        dim dimStart dimEnd (dimEnd - dimStart)
+        >> img square_black >> origin BottomCentre >> layer Foreground
+        >>= move openStart openStart (320, 480) (320, 480)
+        >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
+        >>= rotate openStart openEnd 0.01f 0.04f
+        >> img square_black >> origin TopCentre >> layer Foreground
+        >>= move openStart openStart (320, 0) (320, 0)
+        >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
+        >>= rotate openStart openEnd 0.01f 0.04f

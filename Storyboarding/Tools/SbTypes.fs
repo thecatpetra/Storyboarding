@@ -11,6 +11,7 @@ module SbTypes =
         | Out = 2
         | QuadIn = 3
         | QuadOut = 4
+        | QuadInOut = 5
         | QuartIn = 9
         | QuartOut = 10
         | SineIn = 15
@@ -80,7 +81,7 @@ module SbTypes =
 
     let inline (+++) x = elementWise (+) x
 
-    let inline ( *** ) s (vx, vy) = vx * s, vy * s
+    let inline ( *** ) (s: int) ((vx, vy) : Position) = vx * s, vy * s
 
     let length position =
         let square x = x * x

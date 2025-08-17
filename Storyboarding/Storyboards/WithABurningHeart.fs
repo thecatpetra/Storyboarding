@@ -140,7 +140,7 @@ module WithABurningHeart =
         (TextUtils.text font_monosans wab wabEffect wabPosition wabScale
         >>= TextUtils.text font_text_me_one h hEffect hPosition hScale) sb
 
-    let chorus timeStart extend =
+    let chorus timeStart extend lastPart =
         let adjustTime = fun x -> x - (t "01:11:146") + timeStart
         let timeEnd = timeStart - (t "01:11:146") + (t "01:36:480") + extend
         let soloStart = timeStart - (t "01:11:146") + (t "01:27:946")
@@ -152,6 +152,7 @@ module WithABurningHeart =
                       t "01:21:546", "In the sky of a million stars"
                       t "01:23:946", "With a burning heart"
                       t "01:25:546", "We'll fight another day"]
+                     @ if lastPart then [t "01:28:213", "With a burning heart"; t "01:29:813", "We'll fight another day"] else []
                      |> Seq.map (fun (a, b) -> adjustTime a, b)
         background bg_burning_heart_raw (timeStart + 800) (timeEnd + 100)
         >>= bgMovement (timeStart + 800) timeEnd
@@ -263,19 +264,50 @@ module WithABurningHeart =
         >>= PerNoteEffect.pingEffect pingGen (t "05:02:346") (t "05:04:746")
         >>= stdLyrics lyrics
 
+    let withABurningHeartLast t1 t2 sb =
+        let text = "WITH A BURNING HEART"
+        let text2 = "Eyes of fire, cold as ice"
+        let position1 = TextUtils.centreOfText font_text_me_one text 0.22f +++ (0, -20)
+        let position2 = TextUtils.centreOfText font_text_me_one text2 0.18f +++ (0, 20)
+        let c1 = (190, 90, 33)
+        let c2 = (160, 60, 33)
+        let c3 = (112, 255, 241)
+        let c4 = (36, 204, 237)
+        let eff1 = (TextUtils.neonInOut 4000 t1 c1 c2)
+        let eff2 = (TextUtils.neonInOut 2000 t2 c3 c4)
+        (TextUtils.text font_text_me_one text eff1 position1 0.22f
+        >>= TextUtils.text font_text_me_one text2 eff2 position2 0.18f) sb
+
+    let lastBurningHeart =
+        let timeStart, timeEnd = (t "05:47:146"), (t "05:55:946")
+        let blurred = bg_desert_sunset |> ImageFilters.gaussBlur 5f
+        Transition.dim (t "05:03:479") (t "05:04:479") 1000
+        >>= background square_black (t "05:03:479") (t "05:09:812")
+        >>= withABurningHeartLast (t "05:04:746") (t "05:06:612")
+        >>= chorus (t "05:09:012") 0 false
+        >>= Transition.blackCurtains (t "05:25:279") (t "05:26:879") (t "05:26:879") (t "05:28:946")
+        >>= chorus (t "05:26:079") 0 true
+        >>= Transition.blackCurtains (t "05:46:079") (t "05:47:146") (t "05:47:146") (t "05:50:212")
+        >>= background bg_desert_sunset timeStart timeEnd
+        >> background blurred timeStart (t "05:55:946")
+        >>= fade (t "05:47:146") (t "05:49:279") 1f 0f
+        >>= FFTEffects.circleFft timeStart timeEnd
+        >>= Transition.dim (t "05:52:346") (t "05:55:986") ((t "05:55:986") - (t "05:52:346"))
+
     let story =
         introSection
         >>= fillerSection1
         >>= lyricsSection1
         >>= burningHeart (t "00:54:080")
-        >>= chorus (t "01:11:146") 0
+        >>= chorus (t "01:11:146") 0 false
         >>= lyricsSection2
         >>= burningHeart (t "02:03:413")
-        >>= chorus (t "02:20:480") (t "02:47:946" - t "02:45:813")
+        >>= chorus (t "02:20:480") (t "02:47:946" - t "02:45:813") false
         >>= soloSection1
         >>= soloSection2
         >>= chillSection
-        >>= burningHeartFinal
+        >>= lastBurningHeart
+        >>= background vignette 0 (t "05:55:946") >> layer Foreground
 
     let make () =
         openSb path

@@ -9,6 +9,7 @@ open System.Text
 open MapsetParser.objects
 open SbMonad
 open Resources
+open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
 open Storyboarding.Tools.ImageFilters
 

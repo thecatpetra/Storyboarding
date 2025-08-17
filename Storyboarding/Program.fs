@@ -1,8 +1,10 @@
 ﻿namespace Storyboarding
 
+open System.IO
 open MapsetParser.objects
 open MapsetParser.objects.hitobjects
 open Storyboarding.Storyboards
+open Storyboarding.Tools
 
 module Program =
     let signalSuccess () =

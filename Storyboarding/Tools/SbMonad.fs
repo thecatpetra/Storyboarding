@@ -6,6 +6,7 @@ open MapsetParser.objects
 open SbTypes
 open Resources
 open System.IO
+open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
 
 // Goofy and not a monad actually

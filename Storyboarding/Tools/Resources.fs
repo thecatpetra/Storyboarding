@@ -1,11 +1,6 @@
 ﻿namespace Storyboarding.Tools
 
 module Resources =
-    let resourcesFolder = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\"
-    let scriptPath = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Scripts"
-    let savePathPrefix = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\font"
-    let fontsFolder = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Fonts"
-
     let square_black = "effects/128square.png"
     let square_white = "effects/128square_white.png"
     let fog = "effects/fog.png"
@@ -27,25 +22,36 @@ module Resources =
     let circle_dotted = "effects/circle_dotted.png"
     let black_circle = "effects/black_circle.png"
     let gradient = "effects/grad.png"
+    let vignette = "effects/vignette_black.png"
 
-    let bg_lights = "bg/aa-lights.jpg"
-    let bg_twins_upper = "bg/LeKWYk_upper.jpg"
-    let bg_twins_lower = "bg/LeKWYk_lower.jpg"
-    let bg_twins_lower_masked = "bg/LeKWYk_lower_rain_mask.png"
-    let bg_twins = "bg/LeKWYk.jpg"
-    let bg_burning_heart = "bg/burning_heart.jpg"
-    let bg_burning_heart_raw = "bg/q9WmNL.png"
-    let bg_grayish_sky = "bg/5Xzmxw_cut.jpg"
-    let bg_warrior_on_a_log = "bg/1N6mmX.jpg"
-    let bg_burning_city = "bg/1476171916-1.jpg"
-    let bg_desert_sunset = "bg/OmONLv.jpg"
-    let bg_mountains_sunset = "bg/GXkwJB.jpg"
-    let bg_campfire = "bg/L4R68K.jpg"
+    let e_bubble i = $"effects/bubbles/bubble_{i}.png"
+
+    let fhd = ImageFilters.resizeToFHD
+
+    let bg_lights = fhd "bg/aa-lights.jpg"
+    let bg_twins_upper = fhd "bg/LeKWYk_upper.jpg"
+    let bg_twins_lower = fhd "bg/LeKWYk_lower.jpg"
+    let bg_twins_lower_masked = fhd "bg/LeKWYk_lower_rain_mask.png"
+    let bg_twins = fhd "bg/LeKWYk.jpg"
+    let bg_burning_heart = fhd "bg/burning_heart.jpg"
+    let bg_burning_heart_raw = fhd "bg/q9WmNL.png"
+    let bg_grayish_sky = fhd"bg/5Xzmxw_cut.jpg"
+    let bg_warrior_on_a_log = fhd"bg/1N6mmX.jpg"
+    let bg_burning_city = fhd "bg/1476171916-1.jpg"
+    let bg_desert_sunset = fhd "bg/OmONLv.jpg"
+    let bg_mountains_sunset = fhd "bg/GXkwJB.jpg"
+    let bg_campfire = fhd "bg/L4R68K.jpg"
+
+    let bg_hidamari_1 = "bg/hidamari/1.jpg"
+    let bg_hidamari_2 = "bg/hidamari/2.jpg"
+    let bg_hidamari_3 = "bg/hidamari/3.jpg"
+    let bg_hidamari_4 = "bg/hidamari/4.jpg"
 
     let font_finger_paint = "font/FingerPaint-Regular.ttf"
     let font_monomach = "font/Monomakh-Regular.ttf"
     let font_monosans = "font/MonaSans-Light.ttf"
     let font_text_me_one = "font/TextMeOne-Regular.ttf"
+    let font_notosans_jp = "font/NotoSansJP-Regular.ttf"
 
     let gp_simple_circle = "gameplay/simple_circle.png"
     let gp_simple_approach_circle = "gameplay/approach_circle.png"

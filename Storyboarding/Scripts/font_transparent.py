@@ -18,6 +18,7 @@ for image_name in os.listdir(sys.argv[1]):
     for i in range(image.size[0]):
         for j in range(image.size[1]):
             r = image_pixels[i, j]
+            r = r if isinstance(r, int) else 255 - r[0]
             new_image_pixels[i, j] = (255, 255, 255, r)
 
     new_image.save(sys.argv[1] + "/" + image_name)

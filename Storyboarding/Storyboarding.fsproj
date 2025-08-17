@@ -7,10 +7,11 @@
 
     <ItemGroup>
         <Compile Include="Tools\SbTypes.fs" />
+        <Compile Include="Tools\Paths.fs" />
+        <Compile Include="Tools\ImageFilters.fs" />
         <Compile Include="Tools\Resources.fs" />
         <Compile Include="Tools\SbMonad.fs" />
         <Compile Include="Tools\SbRandom.fs" />
-        <Compile Include="Tools\ImageFilters.fs" />
         <Compile Include="Tools\TextUtils.fs" />
         <Compile Include="Tools\SbCompiler.fs" />
         <Compile Include="Tools\GeometryUtils.fs" />
@@ -32,6 +33,7 @@
         <Compile Include="Storyboards\WithABurningHeart.fs" />
         <Compile Include="Storyboards\M.fs" />
         <Compile Include="Storyboards\Isolation.fs" />
+        <Compile Include="Storyboards\HidamariNoUta.fs" />
         <Compile Include="Program.fs" />
         <Folder Include="Scripts\" />
     </ItemGroup>
