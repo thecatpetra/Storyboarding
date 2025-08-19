@@ -12,6 +12,7 @@ open Storyboarding.Tools.SbMonad
 open Storyboarding.Effects.Background
 open Storyboarding.Tools.SbRandom
 open Storyboarding.Tools.SbTypes
+open Storyboarding.Tools.TextUtils
 
 module WithABurningHeart =
     // Fine map but i hate ranked
@@ -49,27 +50,27 @@ module WithABurningHeart =
         monadicMap [0..3] (fun i ->
         let text = "WITH A BURNING HEART"
         let scale = 0.18f + 0.02f * (float32 i)
-        let position = TextUtils.centreOfText font_text_me_one text scale
+        let position = centreOfText font_text_me_one text scale
         let c1 = (120 + 40 * i, 20 + 18 * i, 0)
         let c2 = (120 + 40 * i, 30 + 33 * i, 33 * i)
-        let eff = (TextUtils.neonInOut 2000 (timeStart + i * diff) c1 c2)
+        let eff = (neonInOut 2000 (timeStart + i * diff) c1 c2)
         TextUtils.text font_text_me_one text eff position scale) sb
 
     let stdLyrics lyrics =
         monadicMap (Seq.toList lyrics) (fun l ->
         let time, txt = l
         let scale = 0.25f
-        let position = TextUtils.centreOfText font_monosans txt scale
-        let effect = TextUtils.chromoInOut 1000 25 time
-        TextUtils.text font_monosans txt effect position scale)
+        let position = centreOfText font_monosans txt scale
+        let effect = chromoInOut 1000 25 time
+        text font_monosans txt effect position scale)
 
     let stdLyrics2 lyrics =
         monadicMap (Seq.toList lyrics) (fun l ->
         let time, txt = l
         let scale = 0.3f
-        let position = TextUtils.centreOfText font_monosans txt scale
-        let effect = TextUtils.neonInOut 1300 time (255, 255, 128) (255, 0, 0)
-        TextUtils.text font_monosans txt effect position scale)
+        let position = centreOfText font_monosans txt scale
+        let effect = neonInOut 1300 time (255, 255, 128) (255, 0, 0)
+        text font_monosans txt effect position scale)
 
     let pingGen (ho : HitObject) =
         let isNewCombo = ho.``type`` &&& HitObject.Type.NewCombo = HitObject.Type.NewCombo
@@ -267,14 +268,14 @@ module WithABurningHeart =
     let withABurningHeartLast t1 t2 sb =
         let text = "WITH A BURNING HEART"
         let text2 = "Eyes of fire, cold as ice"
-        let position1 = TextUtils.centreOfText font_text_me_one text 0.22f +++ (0, -20)
-        let position2 = TextUtils.centreOfText font_text_me_one text2 0.18f +++ (0, 20)
+        let position1 = centreOfText font_text_me_one text 0.22f +++ (0, -20)
+        let position2 = centreOfText font_text_me_one text2 0.18f +++ (0, 20)
         let c1 = (190, 90, 33)
         let c2 = (160, 60, 33)
         let c3 = (112, 255, 241)
         let c4 = (36, 204, 237)
-        let eff1 = (TextUtils.neonInOut 4000 t1 c1 c2)
-        let eff2 = (TextUtils.neonInOut 2000 t2 c3 c4)
+        let eff1 = (neonInOut 4000 t1 c1 c2)
+        let eff2 = (neonInOut 2000 t2 c3 c4)
         (TextUtils.text font_text_me_one text eff1 position1 0.22f
         >>= TextUtils.text font_text_me_one text2 eff2 position2 0.18f) sb
 
@@ -294,8 +295,17 @@ module WithABurningHeart =
         >>= FFTEffects.circleFft timeStart timeEnd
         >>= Transition.dim (t "05:52:346") (t "05:55:986") ((t "05:55:986") - (t "05:52:346"))
 
+    let signature =
+        let titleCenter = centreOfText font_monosans "Dragonforce - Burning Heart" 0.3f
+        text font_monosans "Dragonforce - Burning Heart" (neonInOut 8500 (t "00:00:480") (255, 130, 90) (160, 60, 33)) titleCenter 0.3f
+        >>= text font_monosans "Map by: " (neonInOut 4300 (t "00:04:746") (192, 192, 192) (0, 0, 0)) (70, 320) 0.15f
+        >>= text font_monosans "Rose Winters" (neonInOut 4300 (t "00:04:746") (112, 255, 241) (36, 204, 237)) (140, 320) 0.15f
+        >>= text font_monosans "SB by: " (neonInOut 4300 (t "00:04:746") (192, 192, 192) (0, 0, 0)) (70, 350) 0.15f
+        >>= text font_monosans "TheCatPetra" (neonInOut 4300 (t "00:04:746") (154, 219, 191) (87, 194, 180)) (125, 350) 0.15f
+
     let story =
         introSection
+        >>= signature
         >>= fillerSection1
         >>= lyricsSection1
         >>= burningHeart (t "00:54:080")

@@ -4,6 +4,7 @@ open System.IO
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
 open Storyboarding.Effects.PerNoteEffect
+open Storyboarding.Effects.Transition
 open Storyboarding.Tools
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.Resources
@@ -36,34 +37,58 @@ module HidamariNoUta =
                    (t "02:06:713", "陽だまりの中に"), (t "02:10:243", "映りこむ")
                    (t "02:13:772", $"あなたの{char 12131}きてた"), (t "02:17:301", "その証")]
 
-    do
-        let all_text = $"%A{lyrics}%A{lyrics2}"
-        let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
-        TextUtils.createFontSubset fontPath all_text 128
+    // do
+    //     let all_text = $"%A{lyrics}%A{lyrics2}"
+    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
+    //     TextUtils.createFontSubset fontPath all_text 128
+    // do
+    //     let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
+    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
+    //     TextUtils.createFontSubset fontPath all_text 128
+
+    let doubleChromoFlash a b c d =
+        chromoFlash a b c d
+        >>= chromoFlash a b c d
 
     let intro =
         let blurredMax = bg_hidamari_1 |> ImageFilters.gaussBlur 40f
         let blurredAvg = bg_hidamari_1 |> ImageFilters.gaussBlur 20f
-        let blurredMin = bg_hidamari_1 |> ImageFilters.gaussBlur 7f
-        background blurredMin 0 (t "00:56:566")
-        >> background blurredMin 0 (t "00:56:566")
-        >>= fade (t "00:47:743") (t "00:56:566") 1f 0f
-        >> background blurredAvg 0 (t "00:56:566")
-        >>= fade (t "00:38:919") (t "00:47:743") 1f 0f
+        background blurredAvg 0 (t "00:56:566")
         >> background blurredMax 0 (t "00:56:566")
-        >>= fade (t "00:28:331") (t "00:38:919") 1f 0f
+        >>= fade (t "00:28:331") (t "00:56:566") 1f 0f
+        >>= MarchingSquares.withDisturbances 0 (t "00:56:566")
         >>= color (t "00:00:000") (t "00:38:919") (0, 0, 0) (192, 192, 192)
-        >>= Transition.chromoFlash (t "00:51:919") (t "00:56:566") (t "00:56:566") 300
-        >>= Transition.chromoFlash (t "00:51:919") (t "00:56:566") (t "00:56:566") 300
-        >> parallax (t "00:56:566") (t "01:24:360") [ "bg/hidamari/1_3.jpg", 7f; "bg/hidamari/1_2.png", 13f; "bg/hidamari/1_1.png", 40f ]
+        >>= doubleChromoFlash (t "00:51:919") (t "00:56:566") (t "00:56:566") 300
+        >> parallax (t "00:56:566") (t "01:24:360") [ "bg/hidamari/1_3.jpg", 6f; "bg/hidamari/1_2.png", 11f; "bg/hidamari/1_1.png", 20f ]
         >>= doubleRayEffect (onlyFirstCombo lightParamOfCombo) (t "00:56:566") (t "01:24:360")
-        >>= Transition.blackCurtains (t "01:21:272") (t "01:24:360") (t "01:24:360") (t "01:25:684")
+        >>= blackCurtains (t "01:21:272") (t "01:24:360") (t "01:24:360") (t "01:25:684")
 
     let firstSection =
         parallax (t "01:24:360") (t "01:52:595") [ "bg/hidamari/2_3.jpg", 4f; "bg/hidamari/2_2.png", 7f; "bg/hidamari/2_1.png", 14f ]
-        >>= Transition.blackCurtains (t "01:49:066") (t "01:52:595") (t "01:52:595") (t "01:53:478")
-        >>= Transition.chromoFlash (t "02:20:169") (t "02:21:272") (t "02:23:037") 300
-        >>= Transition.chromoFlash (t "02:20:169") (t "02:21:272") (t "02:23:037") 300
+        >>= blackCurtains (t "01:49:066") (t "01:52:595") (t "01:52:595") (t "01:53:478")
+        >>= doubleChromoFlash (t "02:20:169") (t "02:21:272") (t "02:23:698") 300
+        >>= blackCurtains (t "02:21:272") (t "02:24:140") (t "02:24:140") (t "02:25:243")
+
+    let kiaiEffects ts te =
+        circleEffect lightParamOfCombo ts te
+        >>= pingEffect (onlyFirstCombo lightPingOfCombo) ts te
+
+    let kiai1 =
+        parallax (t "01:52:595") (t "02:23:037") [ "bg/hidamari/3_3.jpg", 6f; "bg/hidamari/3_2.png", 11f; "bg/hidamari/3_1.png", 20f ]
+        >>= kiaiEffects (t "01:52:595") (t "02:23:037")
+
+    let kiai2 =
+        parallax (t "04:12:007") (t "04:40:683") [ "bg/hidamari/3_3.jpg", 6f; "bg/hidamari/3_2.png", 11f; "bg/hidamari/3_1.png", 20f ]
+        >>= kiaiEffects (t "04:12:007") (t "04:40:683")
+        >>= doubleChromoFlash (t "04:39:580") (t "04:40:683") (t "04:40:683") 1500
+
+    let nearKiai =
+        parallax (t "03:15:978") (t "03:44:213") [ "bg/hidamari/3_3.jpg", 6f; "bg/hidamari/3_2.png", 11f; "bg/hidamari/3_1.png", 20f ]
+        >>= blackCurtains (t "03:42:228") (t "03:43:772") (t "03:43:772") (t "03:45:095")
+
+    let secondSection =
+        parallax (t "02:24:140") (t "02:53:037") [ "bg/hidamari/2_3.jpg", 4f; "bg/hidamari/2_2.png", 7f; "bg/hidamari/2_1.png", 14f ]
+        >>= blackCurtains (t "02:52:154") (t "02:53:037") (t "02:53:037") (t "02:55:037")
 
     let stdLyrics lyrics =
         monadicMap (Seq.toList lyrics) (fun l ->
@@ -79,18 +104,106 @@ module HidamariNoUta =
         let time, txt = l
         let scale = 0.33f
         let position = TextUtils.centreOfText font_notosans_jp txt scale +++ (0, p * 30)
-        let effect = TextUtils.neonInOut (2700 / 2 * (3 - p)) time (255, 255, 255) (0, 128, 255)
+        let effect = TextUtils.chromoSpinInOut (3530 / 2 * (3 - p) - 800) 20 time
         TextUtils.text font_notosans_jp txt effect position scale))
 
     let renderLyrics =
         stdLyrics lyrics
 
     let renderLyrics2 =
-        stdLyrics2 lyrics2
+        let diff = (t "04:12:007") - (t "01:52:595")
+        stdLyrics2 (lyrics2 @ (lyrics2 |> List.map (fun ((t1, txt1), (t2, txt2)) -> (t1 + diff, txt1), (t2 + diff, txt2))))
+
+    let goofyAhhSection =
+        let timeStart = (t "02:53:037")
+        let timeEnd = (t "03:15:978")
+        let bgEffect sb =
+            let iteration = beatTime timeStart sb |> (*) 64
+            let inner direction c = monadicMap [0..4] (fun i ->
+                img square_white
+                >>= color timeStart timeStart c c
+                >>= rotate timeStart timeStart (0.2f * (float32 direction)) (0.2f * (float32 direction))
+                >>= vectorScale timeStart timeStart (0.8f, 4.5f) (0.8f, 4.5f)
+                >>= fade (t "03:15:978") (t "03:15:979") 1f 0f
+                >>= timeDivisionMap timeStart timeEnd iteration (fun (ts, te) ->
+                let prevPosition = (320 - direction * (-520 + 200 * i), 240)
+                let nextPosition = (320 - direction * (-520 + 200 * (i + 1)), 240)
+                move ts te prevPosition nextPosition))
+            (inner 1 (245, 245, 245) >>= inner -1 (235, 235, 235)) sb
+        let goofySectionTextEffect stay time = fun i image s p ->
+            let effectTime = 1200
+            let diff = 220 * i
+            monadicMap [-1] (fun ii ->
+            img image
+            >>= move (time + diff) (time + effectTime + diff) (p +++ (0, 20 * ii)) p >> easing Easing.In
+            >>= fade (time + diff) (time + effectTime + diff) 0f 1f
+            >>= fade (time + stay) (time + stay + effectTime) 1f 0f
+            >>= scale (time + diff) (time + stay) s s
+            >>= color (time + diff) (time + stay) (0, 0, 0) (0, 0, 0))
+        let nagai time =
+            let effect = goofySectionTextEffect 1800 time
+            TextUtils.textCenter font_notoserif_jp $"{char 11985}い  {char 11985}い" effect 0.3f
+        let jikan time =
+            let effect = goofySectionTextEffect 2500 time
+            TextUtils.textCenter font_notoserif_jp "時間の中で…" effect 0.3f
+        let imamo time =
+            let effect = goofySectionTextEffect 2000 time
+            TextUtils.textCenter font_notoserif_jp "今も…" effect 0.3f
+        background square_white timeStart timeEnd
+        >>= bgEffect
+        >>= nagai (t "02:53:037") >>= jikan (t "02:55:242")
+        >>= nagai (t "02:58:331") >>= jikan (t "03:00:537")
+        >>= nagai (t "03:03:184") >>= jikan (t "03:05:831")
+        >>= nagai (t "03:08:478") >>= jikan (t "03:11:125")
+        >>= imamo (t "03:14:213")
+
+    let silenceSection =
+        let timeStart = t "03:43:772"
+        let timeEnd = t "04:12:007"
+        let lyrics = ["死ぬ.こと|の意.味を|理解.した|僕.は"; "この.世の|全.てを|愛.そう|と決.めた"; "教.えて|もら.った|何も.かも|全.て"; "陽だ.まりの|中.に|「ありがとう」.|と響.く…"]
+        let effect stay time = fun i image s p ->
+            img (image |> ImageFilters.gaussBlur 1f |> ImageFilters.maskOnWhite)
+            >>= move (time + i * 220) (time + stay |> min timeEnd) p p
+            >>= scale (time + i * 220) (time + i * 220) s s
+        let txt =
+            monadicMapi lyrics (fun i part ->
+            monadicMapi (part.Split("|") |> Seq.toList) (fun j syl ->
+            let [ft; sd] = syl.Split(".") |> Seq.toList
+            let t = (1764 * j + 7058 * i) + timeStart
+            let horizontal = TextUtils.textWidth font_notoserif_jp ft 0.4f |> int
+            TextUtils.text font_notoserif_jp ft (effect (3528 * 2) t) (64, 144 + 80 * j) 0.4f
+            >>= TextUtils.text font_notoserif_jp sd (effect (3528 * 2 - 880) (t + 880)) (64 + horizontal, 144 + 80 * j) 0.4f))
+        background square_black timeStart (t "04:12:007")
+        >>= txt
+        >>= background screen_overlay timeStart (t "04:12:007")
+        >>= blackCurtains (t "04:08:477") (t "04:12:007") (t "04:12:007") (t "04:14:007")
+
+    let finSection =
+        parallax (t "04:40:683") (t "05:08:919") [ "bg/hidamari/4_3.jpg", 7f; "bg/hidamari/4_2.png", 11f; "bg/hidamari/4_1.png", 20f ]
+        >>= kiaiEffects (t "04:54:801") (t "05:08:919")
+        >>= doubleChromoFlash (t "05:07:154") (t "05:08:919") (t "05:08:919") 2000
+
+    let closingSection =
+        let blurredMax = bg_hidamari_1 |> ImageFilters.gaussBlur 40f
+        let blurredAvg = bg_hidamari_1 |> ImageFilters.gaussBlur 20f
+        background blurredAvg (t "05:08:919") (t "05:28:676")
+        >> background blurredMax (t "05:08:919") (t "05:28:676")
+        >>= fade (t "05:08:919") (t "05:28:676") 0f 1f
+        >>= color (t "05:08:919") (t "05:28:676") (192, 192, 192) (0, 0, 0)
+        >>= MarchingSquares.withDisturbances (t "05:08:919") (t "05:28:676")
 
     let story =
-        intro
+        removeBg
+        >>= intro
         >>= firstSection
+        >>= kiai1
+        >>= secondSection
+        >>= goofyAhhSection
+        >>= nearKiai
+        >>= silenceSection
+        >>= kiai2
+        >>= finSection
+        >>= closingSection
         >>= renderLyrics
         >>= renderLyrics2
         >>= background vignette 0 (t "05:28:676") >> layer Foreground

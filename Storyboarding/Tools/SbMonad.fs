@@ -131,11 +131,16 @@ module SbMonad =
     let verticalFlip = parameter "V"
 
     let img resource =
-        let i = { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center }
+        let i = { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center; x = 320; y = 240; copy = true }
         addSprite i
 
+    let coords (x, y) =
+        applyToLastSprite (fun s -> {s with x = x; y = y})
+
+    let noCopy = applyToLastSprite (fun s -> {s with copy = false})
+
     let pureSprite resource =
-        { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center }
+        { name = resource; layer = Layer.Background; difficulty = None; instructions = []; origin = Center; x = 320; y = 240; copy = true }
 
     let diffSpecific diff =
         applyToLastSprite (fun s -> { s with difficulty = Some(diff) })
@@ -173,3 +178,8 @@ module SbMonad =
 
     let getCurrentSprite (sb : SB) =
         sb.sprites |> Seq.head |> _.name
+
+    let removeBg (sb : SB) =
+        // Sprite,Background,TopLeft,"background.jpg",0,0
+        let location = sb.beatmapSet.beatmaps[0].backgrounds[0].path
+        sb |> (img location >> origin TopLeft >> coords (0, 0) >> noCopy)

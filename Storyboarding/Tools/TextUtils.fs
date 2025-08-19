@@ -70,6 +70,24 @@ module TextUtils =
             | [] -> id
         inner position unicodes 0
 
+    let textWidth font (txt : string) (scale : float32) =
+        let unicodes = txt |> Seq.toList |> List.map int
+        ensureFont font
+        let listFolder acc e =
+            let image = Path.Join(font, $"{e}.png")
+            let fullPath = Path.Join(resourcesFolder, image)
+            let width = imageWidth fullPath
+            acc + width
+        List.fold listFolder 0 unicodes |> float32 |> (*) scale
+
+    let centreOfText font (txt : string) (scale : float32) =
+        let totalWidth = textWidth font txt scale
+        (- totalWidth |> int) / 2 + 320, 240
+
+    let textCenter font txt charAction scale =
+        let p = centreOfText font txt scale
+        text font txt charAction p scale
+
     let noEffect time : CharAction = fun _ image s p ->
         img image
         >>= move time time p p
@@ -77,8 +95,8 @@ module TextUtils =
         >>= fade time (time + 10000) 1f 1f
 
     let chromoInOut stay diff time : CharAction = fun i image s p ->
-        let stride = 4f
-        let effectTime = 200
+        let stride = 3f
+        let effectTime = 150
         let colorOfIndex =  function
             | 0 -> (255, 0, 0)
             | 1 -> (0, 255, 0)
@@ -113,14 +131,21 @@ module TextUtils =
         >>= color time time c1 c1
         >>= alpha
 
-    let centreOfText font (txt : string) (scale : float32) =
-        let unicodes = txt |> Seq.toList |> List.map int
-        printfn $"Rendering text {txt}"
-        ensureFont font
-        let listFolder acc e =
-            let image = Path.Join(font, $"{e}.png")
-            let fullPath = Path.Join(resourcesFolder, image)
-            let width = imageWidth fullPath
-            acc + width
-        let totalWidth = List.fold listFolder 0 unicodes |> float32
-        (- totalWidth * scale |> int) / 2 + 320, 240
+    let chromoSpinInOut stay diff time : CharAction = fun i image s p ->
+        let stride = 1f
+        let effectTime = 400
+        let colorOfIndex =  function
+            | 0 -> (255, 0, 0)
+            | 1 -> (0, 255, 0)
+            | _ -> (0, 0, 255)
+        let inner c dp =
+            img image
+            >>= move (time + i * diff) (time + i * diff + effectTime) (addX p dp) p
+            >>= vectorScale (time + i * diff) (time + effectTime + i * diff) (0f, s) (s, s)
+            >> easing Easing.QuadIn
+            >>= color time time c c
+            >>= move (stay + time + i * diff) (stay + time + i * diff + effectTime) p (addX p (-dp))
+            >>= vectorScale (stay + time + i * diff) (time + effectTime + stay + i * diff) (s, s) (0f, s)
+            >> easing Easing.QuadOut
+            >>= alpha
+        monadicMapi [-1f; 0f; 1f] (fun i e -> inner (colorOfIndex i) (stride * e))

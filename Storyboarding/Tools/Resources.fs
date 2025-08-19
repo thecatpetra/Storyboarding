@@ -6,6 +6,7 @@ module Resources =
     let fog = "effects/fog.png"
     let glow_ray = "effects/glow_ray.png"
     let glow_ray_rotated = "effects/glow_ray_rotated.png"
+    let ineffective_light = "effects/light.png"
     let light = "effects/light.png"
     let light_dot = "effects/light_dot.png"
     let light_squashed = "effects/light_squashed.png"
@@ -23,6 +24,7 @@ module Resources =
     let black_circle = "effects/black_circle.png"
     let gradient = "effects/grad.png"
     let vignette = "effects/vignette_black.png"
+    let screen_overlay = "effects/screen_overlay_2.png"
 
     let e_bubble i = $"effects/bubbles/bubble_{i}.png"
 
@@ -52,6 +54,7 @@ module Resources =
     let font_monosans = "font/MonaSans-Light.ttf"
     let font_text_me_one = "font/TextMeOne-Regular.ttf"
     let font_notosans_jp = "font/NotoSansJP-Regular.ttf"
+    let font_notoserif_jp = "font/NotoSerifJP-Light.ttf"
 
     let gp_simple_circle = "gameplay/simple_circle.png"
     let gp_simple_approach_circle = "gameplay/approach_circle.png"

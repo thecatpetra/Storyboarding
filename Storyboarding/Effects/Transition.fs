@@ -41,10 +41,10 @@ module Transition =
     let blackCurtains dimStart dimEnd openStart openEnd =
         dim dimStart dimEnd (dimEnd - dimStart)
         >> img square_black >> origin BottomCentre >> layer Foreground
-        >>= move openStart openStart (320, 480) (320, 480)
+        >>= move openStart openStart (320, 480) (320, 500)
         >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
         >>= rotate openStart openEnd 0.01f 0.04f
         >> img square_black >> origin TopCentre >> layer Foreground
-        >>= move openStart openStart (320, 0) (320, 0)
+        >>= move openStart openStart (320, 0) (320, -20)
         >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
         >>= rotate openStart openEnd 0.01f 0.04f

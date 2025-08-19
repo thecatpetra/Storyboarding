@@ -21,7 +21,7 @@ module SbTypes =
         | BounceOut = 33
         | BounceInOut = 34
 
-    type Origin = Center | BottomCentre | TopCentre
+    type Origin = Center | BottomCentre | TopCentre | TopLeft
 
     type Layer = Background | Foreground | Overlay
 
@@ -55,6 +55,9 @@ module SbTypes =
         origin: Origin
         difficulty: Beatmap option
         instructions: Instruction list
+        x: int
+        y: int
+        copy: bool
     }
 
     type Position = int * int

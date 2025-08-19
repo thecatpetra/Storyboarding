@@ -28,7 +28,7 @@ module PerNoteEffect =
     let onlyFirstCombo f (ho : HitObject) =
         if isNewCombo ho then f ho else None
 
-    let lightParamOfCombo (ho : HitObject) : LightParam option =
+    let withComboColor (ho : HitObject) (f : Color -> 'a) : 'a =
         // very unoptimal (i dont care though)
         let comboSkip (ho : HitObject) =
             ((ho.``type`` |> int) &&& 112 >>> 4) + 1
@@ -39,13 +39,19 @@ module PerNoteEffect =
                     |> Seq.take (selfIndex + 1)
                     |> Seq.filter isNewCombo
                     |> Seq.fold (fun c h -> (c + comboSkip h) % maxIndex) 0
-        Some { startSize = 1.5f; endSize = 1.2f; lightColor = Seq.item index colors |> (fun v -> (v.X |> int, v.Y |> int, v.Z |> int)); alpha = true }
+        Seq.item index colors |> (fun v -> (v.X |> int, v.Y |> int, v.Z |> int)) |> f
+
+    let lightParamOfCombo (ho : HitObject) : LightParam option =
+        withComboColor ho (fun c -> Some { startSize = 0.9f; endSize = 0.3f; lightColor = c; alpha = true })
+
+    let lightPingOfCombo (ho : HitObject) : PingParams option =
+        withComboColor ho (fun c -> Some { startSize = 0.1f; endSize = 1f; color = c; alpha = true })
 
     let lightParamsOfColors cs (ho : HitObject) : LightParam option =
         assert (cs <> [])
         let index = ho.GetHitObjectIndex()
         let color = cs |> List.item (index % List.length cs)
-        Some { startSize = 1.5f; endSize = 1.2f; lightColor = color; alpha = true }
+        Some { startSize = 0.1f; endSize = 1f; lightColor = color; alpha = true }
 
     let lightParamsOfColor c _ : LightParam option = { startSize = 1.5f; endSize = 1.2f; lightColor = c; alpha = true } |> Some
     let pingParamsOfColor c _ : PingParams option = { startSize = 0.1f; endSize = 1f; color = c; alpha = true } |> Some

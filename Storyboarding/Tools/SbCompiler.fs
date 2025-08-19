@@ -22,7 +22,7 @@ module SbCompiler =
         let copy path =
             Directory.CreateDirectory(FileInfo(Path.Join(sbDirectory, path)).DirectoryName) |> ignore
             File.Copy(Path.Join(resourcesFolder, path), Path.Join(sbDirectory, path))
-        let files = sb.sprites |> Seq.map _.name |> Seq.distinct
+        let files = sb.sprites |> Seq.filter (_.copy) |> Seq.map _.name |> Seq.distinct
         files |> Seq.iter copy
 
     let insertIntoComments (rendered : string) =
@@ -49,6 +49,7 @@ module SbCompiler =
             | Origin.Center -> "Centre"
             | Origin.BottomCentre -> "BottomCentre"
             | Origin.TopCentre -> "TopCentre"
+            | Origin.TopLeft -> "TopLeft"
         let writeInstruction (i : Instruction) =
             let formatPosition (x, y) = $"{x},{y}"
             let formatColor (r, g, b) =
@@ -75,7 +76,7 @@ module SbCompiler =
             | Color -> inner "C" (formatColor (i.iFrom :?> Color)) (formatColor (i.iTo :?> Color))
             | _ -> failwith "Unsupported command for direct compilation"
         let writeSprite (s : Sprite) =
-            builder.AppendLine($"Sprite,{layer s.layer},{origin s.origin},\"s/{s.name}\",320,240") |> ignore
+            builder.AppendLine($"Sprite,{layer s.layer},{origin s.origin},\"s/{s.name}\",{s.x},{s.y}") |> ignore
             s.instructions |> Seq.rev |> Seq.iter writeInstruction
         sprites |> Seq.rev |> Seq.iter writeSprite
         builder.ToString()

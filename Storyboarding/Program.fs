@@ -15,6 +15,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        WithABurningHeart.make ()
+        HidamariNoUta.make ()
         signalSuccess()
         0

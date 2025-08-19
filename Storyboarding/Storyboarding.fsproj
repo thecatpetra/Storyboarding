@@ -23,6 +23,7 @@
         <Compile Include="Effects\PerNoteEffect.fs" />
         <Compile Include="Effects\SquareFading.fs" />
         <Compile Include="Effects\FFTEffects.fs" />
+        <Compile Include="Effects\MarchingSquares.fs" />
         <Compile Include="Gameplay\Util.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />
