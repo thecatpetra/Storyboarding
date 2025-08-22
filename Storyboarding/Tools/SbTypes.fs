@@ -21,7 +21,7 @@ module SbTypes =
         | BounceOut = 33
         | BounceInOut = 34
 
-    type Origin = Center | BottomCentre | TopCentre | TopLeft
+    type Origin = Center | BottomCentre | TopCentre | TopLeft | CentreLeft | CentreRight
 
     type Layer = Background | Foreground | Overlay
 
@@ -90,3 +90,11 @@ module SbTypes =
         let square x = x * x
         let sqrt = float32 >> MathF.Sqrt >> int
         ((position |> fst |> square) + (position |> snd |> square)) |> sqrt
+
+    let rotateBy r (x, y) =
+        let xNew = (MathF.Cos(r) * (float32 x) - MathF.Sin(r) * (float32 y)) |> int
+        let yNew = (MathF.Sin(r) * (float32 x) + MathF.Cos(r) * (float32 y)) |> int
+        xNew, yNew
+
+    let rotateAround rotation origin v =
+        v +++ origin |> rotateBy rotation |> (+++) origin

@@ -26,3 +26,6 @@ module SbRandom =
 
     let choice (set : 'a list) =
         List.item (List.length set |> rng.Next) set
+
+    let randomVector (length : float32) : Position =
+        ((MathF.Cos(randFloat() * MathF.PI * 4f) * length) |> int, (MathF.Sin(randFloat() * MathF.PI * 4f) * length) |> int)

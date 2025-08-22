@@ -15,6 +15,7 @@
         <Compile Include="Tools\TextUtils.fs" />
         <Compile Include="Tools\SbCompiler.fs" />
         <Compile Include="Tools\GeometryUtils.fs" />
+        <Compile Include="Tools\ColorUtils.fs" />
         <Compile Include="Effects\Background.fs" />
         <Compile Include="Effects\SbFFT.fs" />
         <Compile Include="Effects\RealisticSparks.fs" />
@@ -24,6 +25,7 @@
         <Compile Include="Effects\SquareFading.fs" />
         <Compile Include="Effects\FFTEffects.fs" />
         <Compile Include="Effects\MarchingSquares.fs" />
+        <Compile Include="Effects\Cube.fs" />
         <Compile Include="Gameplay\Util.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />
@@ -35,6 +37,7 @@
         <Compile Include="Storyboards\M.fs" />
         <Compile Include="Storyboards\Isolation.fs" />
         <Compile Include="Storyboards\HidamariNoUta.fs" />
+        <Compile Include="Storyboards\SidetrackedDay.fs" />
         <Compile Include="Program.fs" />
         <Folder Include="Scripts\" />
     </ItemGroup>

@@ -63,11 +63,11 @@ module PerNoteEffect =
         | Some eff when ho.time >= timeStart && ho.time < timeEnd ->
             img Resources.light
             >>= layer Layer.Foreground
-            >>= move (int ho.time) (int ho.time) (p ho.Position) (p ho.Position)
-            >>= scale (int ho.time) (int ho.time + 2000) eff.startSize eff.endSize
-            >>= fade (int ho.time) (int ho.time + 2000) 0.3f 0f
+            >>= move (ho.time) (ho.time) (p ho.Position) (p ho.Position)
+            >>= scale (ho.time) (ho.time + 2000) eff.startSize eff.endSize
+            >>= fade (ho.time) (ho.time + 2000) 0.3f 0f
             >>= (eff.alpha >?= alpha)
-            >>= color (int ho.time) (int ho.time) eff.lightColor eff.lightColor
+            >>= color (ho.time) (ho.time) eff.lightColor eff.lightColor
         | _ -> id)
 
     let pingEffect (parameters : HitObject -> PingParams option) timeStart timeEnd  =

@@ -21,7 +21,7 @@ module SbCompiler =
             Directory.Delete(sbDirectory, true)
         let copy path =
             Directory.CreateDirectory(FileInfo(Path.Join(sbDirectory, path)).DirectoryName) |> ignore
-            File.Copy(Path.Join(resourcesFolder, path), Path.Join(sbDirectory, path))
+            File.Copy(Path.Join(resourcesFolder, path), Path.Join(sbDirectory, path), true)
         let files = sb.sprites |> Seq.filter (_.copy) |> Seq.map _.name |> Seq.distinct
         files |> Seq.iter copy
 
@@ -50,6 +50,8 @@ module SbCompiler =
             | Origin.BottomCentre -> "BottomCentre"
             | Origin.TopCentre -> "TopCentre"
             | Origin.TopLeft -> "TopLeft"
+            | Origin.CentreRight -> "CentreRight"
+            | Origin.CentreLeft -> "CentreLeft"
         let writeInstruction (i : Instruction) =
             let formatPosition (x, y) = $"{x},{y}"
             let formatColor (r, g, b) =

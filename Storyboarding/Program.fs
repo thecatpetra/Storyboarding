@@ -15,6 +15,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        HidamariNoUta.make ()
+        SidetrackedDay.make ()
         signalSuccess()
         0

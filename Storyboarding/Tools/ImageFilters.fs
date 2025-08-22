@@ -11,14 +11,16 @@ module ImageFilters =
     type ImageFilter = IImageProcessingContext -> unit
 
     let doOnImage suffix path f =
+
         let fullPath = Path.Join(Paths.resourcesFolder, path)
         let imageFileInfo = FileInfo(fullPath)
         let localPath = Path.GetFileNameWithoutExtension(fullPath) + $"{suffix}{imageFileInfo.Extension}"
         let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
-        use image = Image.Load(fullPath)
-        f image
-        image.Save(newFilename)
-        newFilename.Replace(Paths.resourcesFolder, "")
+        if File.Exists(newFilename) then newFilename.Replace(Paths.resourcesFolder, "")
+        else use image = Image.Load(fullPath)
+             f image
+             image.Save(newFilename)
+             newFilename.Replace(Paths.resourcesFolder, "")
 
     let makeNewImage suffix path (f: Image -> Image) =
         let fullPath = Path.Join(Paths.resourcesFolder, path)
@@ -41,6 +43,18 @@ module ImageFilters =
 
     let resizeToFHD path =
         doOnImage "_fhd" path (_.Mutate(fun o -> o.Resize(1920, 1080) |> ignore))
+
+    let oneTenthFhd path =
+        doOnImage "_otfhd" path (_.Mutate(fun o -> o.Resize(192, 108) |> ignore))
+
+    let twoByTwo path =
+        doOnImage "_tbt" path (_.Mutate(fun o -> o.Resize(2, 2) |> ignore))
+
+    let resizeTo (x: int) y path =
+        doOnImage $"_r1s{x}x{y}" path (_.Mutate(fun o -> o.Resize(x, y) |> ignore))
+
+    let resize1To x path =
+        doOnImage $"_r1s{x}" path (_.Mutate(fun o -> o.Resize(x, x) |> ignore))
 
     let partialFills path =
         let partialFill radius =

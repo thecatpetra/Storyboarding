@@ -6,10 +6,12 @@ open Storyboarding.Effects.Background
 open Storyboarding.Effects.PerNoteEffect
 open Storyboarding.Effects.Transition
 open Storyboarding.Tools
+open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.Resources
 open Storyboarding.Tools.SbMonad
 open Storyboarding.Tools.SbTypes
+open Storyboarding.Tools.TextUtils
 
 module HidamariNoUta =
     let path = @"C:\Users\arthur\AppData\Local\osu!\Songs\2420040 Apol - Hidamari no Uta\Apol - Hidamari no Uta (Asahina Oleshev).osb"
@@ -38,13 +40,13 @@ module HidamariNoUta =
                    (t "02:13:772", $"あなたの{char 12131}きてた"), (t "02:17:301", "その証")]
 
     // do
-    //     let all_text = $"%A{lyrics}%A{lyrics2}"
+    //     let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
     //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
-    //     TextUtils.createFontSubset fontPath all_text 128
+    //     createFontSubset fontPath all_text 128
     // do
     //     let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
     //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
-    //     TextUtils.createFontSubset fontPath all_text 128
+    //     createFontSubset fontPath all_text 128
 
     let doubleChromoFlash a b c d =
         chromoFlash a b c d
@@ -94,18 +96,18 @@ module HidamariNoUta =
         monadicMap (Seq.toList lyrics) (fun l ->
         let time, txt = l
         let scale = 0.20f
-        let position = TextUtils.centreOfText font_notosans_jp txt scale
-        let effect = TextUtils.chromoInOut 2700 100 time
-        TextUtils.text font_notosans_jp txt effect position scale)
+        let position = centreOfText font_notosans_jp txt scale
+        let effect = chromoInOut 2700 100 time
+        text font_notosans_jp txt effect position scale)
 
     let stdLyrics2 lyrics =
         monadicMap lyrics (fun (l1, l2) ->
         monadicMap [l1, -1; l2, 1] (fun (l, p) ->
         let time, txt = l
         let scale = 0.33f
-        let position = TextUtils.centreOfText font_notosans_jp txt scale +++ (0, p * 30)
-        let effect = TextUtils.chromoSpinInOut (3530 / 2 * (3 - p) - 800) 20 time
-        TextUtils.text font_notosans_jp txt effect position scale))
+        let position = centreOfText font_notosans_jp txt scale +++ (0, p * 30)
+        let effect = chromoSpinInOut (3530 / 2 * (3 - p) - 800) 20 time
+        text font_notosans_jp txt effect position scale))
 
     let renderLyrics =
         stdLyrics lyrics
@@ -192,9 +194,34 @@ module HidamariNoUta =
         >>= color (t "05:08:919") (t "05:28:676") (192, 192, 192) (0, 0, 0)
         >>= MarchingSquares.withDisturbances (t "05:08:919") (t "05:28:676")
 
+    let signature =
+        let jpAuthor = "【アポル】"
+        let jpTitle = "陽だまりの詩 歌ってみた"
+        let enAuthor = "Apol"
+        let enTitle = "Hidamari no Uta"
+        let s = 0.2f
+        let jp =
+            let jpAll = jpAuthor + "-  " + jpTitle
+            let jpIcf = indexedGradient (79, 227, 118) (79, 160, 227) 5 >>>> indexedSolid (192, 192, 192) 3 >>>> indexedGradient (79, 224, 227) (84, 79, 227) 12 |> toFun
+            textCenter font_notosans_jp jpAll (neonInOutColorFun (t "00:03:184") (t "00:00:096") jpIcf jpIcf) s
+        let en =
+            let enAll = enAuthor + " - " + enTitle
+            let enIcf = indexedGradient (79, 227, 118) (79, 160, 227) 4 >>>> indexedSolid (192, 192, 192) 3 >>>> indexedGradient (79, 224, 227) (84, 79, 227) 15 |> toFun
+            textCenter font_monosans enAll (neonInOutColorFun (t "00:03:184") (t "00:03:625") enIcf enIcf) s
+        let mapper =
+            let mAll = "Mapped by: " + "Asahina Oleshev"
+            let enIcf = indexedSolid (192, 192, 192) 11 >>>> indexedGradient (255, 198, 161) (255, 159, 133) 15 |> toFun
+            textCenter font_monosans mAll (neonInOutColorFun (t "00:03:184") (t "00:07:154") enIcf enIcf) s
+        let storyboarder =
+            let sAll = "Storyboard by: " + "TheCatPetra"
+            let enIcf = indexedSolid (192, 192, 192) 15 >>>> indexedGradient (107, 242, 202) (152, 213, 250) 11 |> toFun
+            textCenter font_monosans sAll (neonInOutColorFun (t "00:03:184") (t "00:10:684") enIcf enIcf) s
+        jp >>= en >>= mapper >>= storyboarder
+
     let story =
         removeBg
         >>= intro
+        >>= signature
         >>= firstSection
         >>= kiai1
         >>= secondSection

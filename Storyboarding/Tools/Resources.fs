@@ -43,6 +43,7 @@ module Resources =
     let bg_desert_sunset = fhd "bg/OmONLv.jpg"
     let bg_mountains_sunset = fhd "bg/GXkwJB.jpg"
     let bg_campfire = fhd "bg/L4R68K.jpg"
+    let bg_sidetracked_day = fhd "bg/Lgd00.jpg"
 
     let bg_hidamari_1 = "bg/hidamari/1.jpg"
     let bg_hidamari_2 = "bg/hidamari/2.jpg"
@@ -55,9 +56,21 @@ module Resources =
     let font_text_me_one = "font/TextMeOne-Regular.ttf"
     let font_notosans_jp = "font/NotoSansJP-Regular.ttf"
     let font_notoserif_jp = "font/NotoSerifJP-Light.ttf"
+    let font_quicksand = "font/Quicksand-Light.ttf"
+    let font_quicksand_bold = "font/Quicksand-SemiBold.ttf"
 
     let gp_simple_circle = "gameplay/simple_circle.png"
     let gp_simple_approach_circle = "gameplay/approach_circle.png"
     let gp_filled_circle = "gameplay/filled_circle.png"
     let gp_dot32 = "gameplay/dot32.png"
     let gp_square32 = "gameplay/square32.png"
+
+    let shape_triangle = "effects/shapes/shape_triangle.png"
+    let shape_cross = "effects/shapes/shape_cross.png"
+    let shape_lines = "effects/shapes/shape_lines.png"
+    let shape_cube = "effects/shapes/shape_cube.png"
+    let shape_circle_chevron = "effects/shapes/shape_circle_chevron.png"
+    let shape_square = "effects/shapes/shape_square.png"
+
+    let ui_progressbar_long_out = "effects/ui/progressbar_long_outer.png"
+    let ui_progressbar_out = "effects/ui/progressbar_outer.png"

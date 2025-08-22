@@ -159,6 +159,11 @@ module SbMonad =
         let sq = bm.hitObjects |> Seq.cast |> Seq.toList
         monadicMap sq f)
 
+    let getTimeDivisions (timeStart : Time) (timeEnd : Time) (duration: Time) =
+        let segmentCount = timeEnd - timeStart |> fun diff -> diff / duration
+        let genSegment i = i * duration + timeStart
+        [ for i in 0..segmentCount -> genSegment i]
+
     let beatTime (time : int) (sb : SB) =
         let anyBm = sb.beatmapSet.beatmaps |> Seq.cast<Beatmap> |> Seq.head
         anyBm.timingLines |> Seq.filter (fun x -> x.offset < time) |> Seq.last |> _.msPerBeat |> abs |> int

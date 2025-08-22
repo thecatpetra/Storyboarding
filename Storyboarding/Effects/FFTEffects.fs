@@ -2,6 +2,7 @@
 
 open System
 open Storyboarding.Effects.SbFFT
+open Storyboarding.Tools.ImageFilters
 open Storyboarding.Tools.Resources
 open Storyboarding.Tools.SbMonad
 open Storyboarding.Tools.SbRandom
@@ -44,13 +45,13 @@ module FFTEffects =
         >> black_circle_predone
         >>= fade timeEnd timeEnd 0.6f 0f
 
-    let bottomFft timeStart timeEnd =
-        let timeStep = 66
+    let bottomFft timeStart timeEnd colors sb =
+        let timeStep = beatTime (timeStart + 5000) sb |> fun x -> x / 2
         withFft (fun fft ->
         monadicMap [1..50] (fun freq ->
-        let position = (320 + (freq - 25) * 20, 480)
-        let c = lerpColor (89, 111, 255) (240, 62, 116) ((float32 freq) / 50f)
-        img square_white >> origin BottomCentre
+        let position = (320 + (freq - 25) * 18, 480)
+        let c = colors (freq - 1)
+        img (square_white |> twoByTwo) >> origin BottomCentre
         >>= move timeStart timeStart position position
         >>= color timeStart timeStart c c
         >>= alpha
@@ -62,5 +63,5 @@ module FFTEffects =
                      |> (+) -1.4f
                      |> (*) 0.0081f
                      |> fun x -> MathF.Pow(x, 2f)
-        vectorScaleTo time endTime (0.15f, fftRes)
-        >>= fadeTo time endTime (fftRes * 1.0f))))
+        vectorScaleTo time endTime (0.15f * 60f, fftRes * 128f)
+        >>= fadeTo time endTime (fftRes * 1.0f)))) sb
