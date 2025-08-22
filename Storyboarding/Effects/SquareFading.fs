@@ -8,6 +8,7 @@ open Storyboarding.Tools.SbTypes
 
 module SquareFading =
     let squareFadeSequence timeStart timeEnd sb =
+        printfn $"Making square fade sequence ({timeStart}/{timeEnd})"
         let updateFrequency = beatTime (timeStart + 3) sb
         withFft (fun fft ->
         monadicMap [0..9] (fun index ->

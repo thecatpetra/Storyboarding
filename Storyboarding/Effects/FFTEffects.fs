@@ -16,6 +16,7 @@ module FFTEffects =
         p, rotation
 
     let circleFft timeStart timeEnd =
+        printfn $"Making circle FFT {timeStart}/{timeEnd}"
         let timeStep = 66
         let black_circle_predone =
             img black_circle
@@ -46,6 +47,7 @@ module FFTEffects =
         >>= fade timeEnd timeEnd 0.6f 0f
 
     let bottomFft timeStart timeEnd colors sb =
+        printfn $"Making bottom FFT {timeStart}/{timeEnd}"
         let timeStep = beatTime (timeStart + 5000) sb |> fun x -> x / 2
         withFft (fun fft ->
         monadicMap [1..50] (fun freq ->

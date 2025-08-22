@@ -17,6 +17,7 @@ module Background =
         880f / (float32 image.Width)
 
     let background filename timeStart timeEnd =
+        printfn $"Making {filename} background"
         let optimalSize = getOptimalSize filename
         img filename
         >>= scale timeStart timeStart 0f optimalSize
@@ -36,6 +37,7 @@ module Background =
         |> List.map (fun [a; b; c] -> (pointToPosition a, pointToPosition b, pointToPosition c))
 
     let bgLayerMovement (timeStart : Time) (timeEnd : Time) amplitude sb =
+        printfn $"Calculating layer movement ({timeStart}/{timeEnd}/{amplitude})"
         let beat = beatTime timeStart sb
         let iterationTime = beat * 32
         let rotateDiff = 0.03f
@@ -49,7 +51,9 @@ module Background =
         timeDivisionMapi timeStart timeEnd iterationTime iteration sb
 
     let bgMovement (timeStart : Time) (timeEnd : Time) =
+        printfn $"Making bg movement ({timeStart}/{timeEnd})"
         bgLayerMovement timeStart timeEnd 8f
 
     let parallax (ts : Time) (te : Time) sprites =
+        printfn $"Making parallax effect ({ts}/{te}/%A{sprites})"
         monadicMap sprites (fun (sprite, amplitude) -> background sprite ts te >> bgLayerMovement ts te amplitude)

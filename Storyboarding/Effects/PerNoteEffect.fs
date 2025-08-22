@@ -56,7 +56,8 @@ module PerNoteEffect =
     let lightParamsOfColor c _ : LightParam option = { startSize = 1.5f; endSize = 1.2f; lightColor = c; alpha = true } |> Some
     let pingParamsOfColor c _ : PingParams option = { startSize = 0.1f; endSize = 1f; color = c; alpha = true } |> Some
 
-    let circleEffect (parameters : HitObject -> LightParam option) timeStart timeEnd  =
+    let circleEffect (parameters : HitObject -> LightParam option) timeStart timeEnd =
+        printfn $"Circle light effect ({timeStart}/{timeEnd})"
         let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
         forEachHitObject (fun ho ->
         match parameters ho with
@@ -70,7 +71,8 @@ module PerNoteEffect =
             >>= color (ho.time) (ho.time) eff.lightColor eff.lightColor
         | _ -> id)
 
-    let pingEffect (parameters : HitObject -> PingParams option) timeStart timeEnd  =
+    let pingEffect (parameters : HitObject -> PingParams option) timeStart timeEnd =
+        printfn $"Circle ping effect ({timeStart}/{timeEnd})"
         let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
         forEachHitObject (fun ho ->
         match parameters ho with
@@ -86,6 +88,7 @@ module PerNoteEffect =
         | _ -> id)
 
     let rayEffect (parameters : HitObject -> LightParam option) timeStart timeEnd =
+        printfn $"Circle ray effect ({timeStart}/{timeEnd})"
         let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
         forEachHitObject (fun ho ->
         let rotation = (float32 (ho.Position.X - 256f)) / 800f
@@ -102,6 +105,7 @@ module PerNoteEffect =
         | _ -> id)
 
     let doubleRayEffect (parameters : HitObject -> LightParam option) timeStart timeEnd =
+        printfn $"Circle double ray effect ({timeStart}/{timeEnd})"
         let p (ps : Vector2) : Position = (int ps.X + 64, int ps.Y + 64)
         forEachHitObject (fun ho ->
         match parameters ho with

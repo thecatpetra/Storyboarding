@@ -37,6 +37,7 @@ module RealisticSparks =
         >>= easing Easing.In
 
     let effect timeStart timeEnd =
+        printfn $"Making sparks ({timeStart}/{timeEnd})"
         let density = 100
         let iterations = timeEnd - timeStart |> fun x -> x / density
         monadicMap [0..iterations] (fun i ->

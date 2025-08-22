@@ -108,7 +108,7 @@ module SidetrackedDay =
     let squares time =
         let timeEnd = 1500 + time
         let zipLooped c = (c, List.tail c @ [List.head c]) ||> List.zip
-        let positions = [(1, -1); (1, 1); (-1, 1); (-1, -1)] |> List.map (( *** ) 23 >> rotateBy -0.042f >> (+++) (320, 240)) |> zipLooped
+        let positions = [(1, -1); (1, 1); (-1, 1); (-1, -1)] |> List.map (( *** ) 23 >> rotateBy -0.040f >> (+++) (320, 240)) |> zipLooped
         let colors = [first; second; third; fourth]
         monadicMapi (List.zip positions colors) (fun i ((pPrev, pNext), col) ->
         img shape_square
@@ -155,9 +155,10 @@ module SidetrackedDay =
         >>= monadicMap dop3 (dopDopDop (320, 240))
         >>= monadicMap ya4Times yaYaYaYa
         >>= monadicMap ya2Times yaYa
+        >>= Transition.closingTriangles (t "02:26:968") (t "02:28:245") 1000
 
     let timer =
-        let position = 625, 440
+        let position = 635, 450
         // 10 10 6 10 10
         let singleDigitAnimation i timeStart timeEnd position =
             let timeStart, timeEnd = timeStart * 1000, timeEnd * 1000
@@ -181,9 +182,9 @@ module SidetrackedDay =
         )))
 
     let playingStatus =
-        let position = 540, 440
-        let startPosition = 453, 440
-        let endPosition = 625, 440
+        let position = 550, 450
+        let startPosition = 463, 450
+        let endPosition = 635, 450
         let endTime = t "05:34:628"
         let c = third
         img (ui_progressbar_long_out |> resizeTo 720 25) >> coords position
@@ -211,7 +212,7 @@ module SidetrackedDay =
             >>= move (timeEnd - 350) timeEnd p (p +++ (0, -20)) >> easing Easing.QuadOut
             >>= fade (timeEnd - 350) timeEnd 1f 0f >> easing Easing.QuadOut
             >> scale timeStart timeStart s s
-        let line txt ts te = text font_quicksand txt (effect ts te) (450, 452) 0.2f
+        let line txt ts te = text font_quicksand txt (effect ts te) (460, 462) 0.2f
         line "Welcome to the intro!" 0 (t "00:41:011")
         >>= line "Ziny's section" (t "00:41:011") (t "01:47:394")
         >>= line "Ziny's goofy ahh jumps" (t "01:47:394") (t "02:18:032")
@@ -220,19 +221,74 @@ module SidetrackedDay =
         >>= line "The great break" (t "02:48:670") (t "03:09:096")
         >>= line "Petra's three-handed sliders" (t "03:09:096") (t "03:29:521")
         >>= line "Petra's mapping accident" (t "03:29:521") (t "04:11:649")
-        >>= line "Ultra mega stream of death (#2)" (t "04:11:649") (t "04:47:394")
+        >>= line "Ultra mega stream of death" (t "04:11:649") (t "04:47:394")
         >>= line "The last frontier (Slider Stream)" (t "04:47:394") (t "04:52:500")
         >>= line "Ziny's closing section" (t "04:52:500") (t "05:33:351")
-        >>= line "The final outro..." (t "05:33:351") (t "05:38:351")
+        >>= line "The end..." (t "05:33:351") (t "05:38:351")
+
+    let theStream bgStart ts te back =
+        let sectionStart = ts
+        let sectionEnd = te
+        let origin = (300, 220)
+        let m = 4.311578947368421f
+        let iteration = 1200
+        let stay = iteration |> float32 |> (*) m |> int
+        let alphabet = "OI" |> Seq.map (fun i -> $"font/big_render/{int i}.png") |> Seq.toList
+        let randomShape ts te =
+            let shape = SbRandom.choice ((List.collect (List.replicate 15) [shape_triangle; shape_cross]) @ alphabet)
+            let topColor = SbRandom.choice [(248, 250, 146); (251, 169, 122); (217, 87, 63)]
+            let position = SbRandom.randEdgePosition() |> fun (x, y) -> (x * 6 / 5, y * 6 / 5)
+            let rotation = SbRandom.randFloat() |> (*) 2f |> (-) 1f
+            monadicMap [0f, (90, 90, 100); 1f, (111, 107, 125); 2f, (124, 119, 140); 3f, topColor] (fun (s, c) ->
+            let timeOffset = s |> (*) 15f |> int |> fun x -> if back then -x else x
+            let ts, te = ts - timeOffset, te - timeOffset
+            let s = 0.5f + s * 0.01f
+            img shape
+            >>= fade (ts + iteration * 8 / 3 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
+            >>= color (ts + iteration * 3 / 3 |> max sectionStart) (te - iteration |> min sectionEnd) c c
+            >>= rotate ts ts 0.04f rotation
+            >>= vectorScale ts te (0.002f, 0.002f) (s, s) >> easing Easing.ExpoIn
+            >>= move ts te origin position >> easing Easing.ExpoIn
+            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
+        background (square_white |> oneTenthFhd) bgStart te
+        >>= color ts te black dark
+        >>= (back >?< timeDivisionMapi ts (te - iteration * 3 / 2) iteration (fun i (ts, _) ->
+        let ts = ts - iteration * 2
+        let te = stay + ts
+        monadicMap [1..8] (fun _ ->
+        let rsOffset i = SbRandom.randInt 0 (iteration * i) |> (+) -iteration
+        randomShape (ts + rsOffset (1)) (te + rsOffset (3) + iteration))
+        // Vertical
+        >>= monadicMap [-12..11] (fun d ->
+        let d = d * 2 + 1
+        img square_white >> coords (320, 240)
+        >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
+        >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
+        >>= rotate ts ts 0.04f 0.04f
+        >>= vectorScale ts te (0.002f, 6f) (0.01f, 6f) >> easing Easing.ExpoIn
+        >>= move ts te origin (origin +++ (440 * d, 0)) >> easing Easing.ExpoIn
+        >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
+        // Horizontal
+        >>= monadicMap [-12..11] (fun d ->
+        let d = d * 2 + 1
+        img square_white >> coords (320, 240)
+        >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
+        >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
+        >>= rotate ts ts 0.04f 0.04f
+        >>= vectorScale ts te (8f, 0.002f) (8f, 0.02f) >> easing Easing.ExpoIn
+        >>= move ts te origin (origin +++ (0, 440 * d)) >> easing Easing.ExpoIn
+        >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))))
 
     let story =
         opening
         >>= signature
         >>= sectionOne
+        >>= theStream (t "02:28:245") (t "02:28:245") (t "02:48:670") false
+        >>= theStream (t "04:11:649") (t "04:11:649" + 6902) (t "04:52:500") true
         >>= playingStatus
         >>= timer
         >>= sectionsLore
-        >>= background vignette (t "0:0:0") (t "02:28:245") >> layer Foreground
+        >>= background vignette (t "0:0:0") (t "02:48:670") >> layer Foreground
 
     let make () =
         openSb path

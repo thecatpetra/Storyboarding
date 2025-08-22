@@ -5,6 +5,7 @@ open Storyboarding.Tools.SbMonad
 
 module RisingSmoke =
     let effect timeStart timeEnd =
+        printfn $"Making rising smoke ({timeStart}/{timeEnd})"
         let density = 1000
         let iterations = timeEnd - timeStart |> fun x -> x / density
         let iterationTime = (timeEnd - timeStart) / iterations |> int

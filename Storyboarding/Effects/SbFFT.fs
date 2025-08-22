@@ -30,6 +30,7 @@ module SbFFT =
 
 
     let withFft (f : FftResult -> T) sb =
+        printfn $"Calculating FFT for {sb.beatmapSet.beatmaps[0].metadataSettings.titleUnicode}"
         let audio, sampleRate, length = readMono sb
         let sg = SpectrogramGenerator(sampleRate, fftSize=4096, stepSize=441, maxFreq=3000)
         sg.Add(audio, process=false)

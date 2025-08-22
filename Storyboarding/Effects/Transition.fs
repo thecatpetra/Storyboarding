@@ -8,6 +8,7 @@ open Storyboarding.Tools.SbTypes
 module Transition =
     // Defaults: fadeTime = 100
     let dim startTime endTime fadeTime =
+        printfn $"Transition dim ({endTime}/{fadeTime})"
         let allScreenScale = 10f
         img square_black
         >>= scale startTime startTime allScreenScale allScreenScale
@@ -15,6 +16,7 @@ module Transition =
         >>= fade endTime endTime 1f 0f
 
     let chromoFlash timeStart timeEnd endFin stay =
+        printfn $"Transition chromo flash ({timeStart}/{timeEnd}/{endFin}/{stay})"
         let e = Easing.SineIn
         img gradient >> origin BottomCentre >> move timeStart timeStart (240, 650) (240, 650) >> layer Foreground
         >>= fade timeStart timeEnd 0f 1f >>= easing e
@@ -39,6 +41,7 @@ module Transition =
         >>= fade endFin (endFin + stay) 1f 0f
 
     let blackCurtains dimStart dimEnd openStart openEnd =
+        printfn $"Transition black curtains ({dimStart}/{dimEnd}/{openStart}/{openEnd})"
         dim dimStart dimEnd (dimEnd - dimStart)
         >> img square_black >> origin BottomCentre >> layer Foreground
         >>= move openStart openStart (320, 480) (320, 500)
@@ -48,3 +51,7 @@ module Transition =
         >>= move openStart openStart (320, 0) (320, -20)
         >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
         >>= rotate openStart openEnd 0.01f 0.04f
+
+    let closingTriangles ts te openTime =
+        printfn $"Transition closing triangles ({ts}/{te}/{openTime})"
+        id

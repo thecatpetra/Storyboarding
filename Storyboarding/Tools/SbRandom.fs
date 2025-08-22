@@ -17,6 +17,13 @@ module SbRandom =
         prevPosition <- (randX (), randY ())
         prevPosition
 
+    let randEdgePosition () : Position =
+        match randInt 0 4 with
+        | 0 -> (randX(), 0)
+        | 1 -> (randX(), 480)
+        | 2 -> (-114, randY())
+        | _ -> (754, randY())
+
     let randColor () : Color =
         prevColor <- (rng.Next(0, 255), rng.Next(0, 255), rng.Next(0, 255))
         prevColor

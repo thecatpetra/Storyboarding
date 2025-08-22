@@ -48,6 +48,17 @@ module SbMonad =
         if choice then f sb
         else sb
 
+    let (>?<) : bool -> T -> T = fun reverse f sb ->
+        let inverseEasing (e : Easing) =
+            let e = int e
+            if e % 3 = 2 then enum<Easing> e else
+            if e % 3 = 0 then enum<Easing> (e + 1) else enum<Easing> (e - 1)
+        let inverseInstructions (sprites : Sprite list) : Sprite list =
+            sprites |> List.map (fun (s : Sprite) -> {s with instructions = List.map (fun i -> {i with iTo = i.iFrom; iFrom = i.iTo; easing = inverseEasing i.easing}) s.instructions})
+        let innerSb = f { path = "err"; beatmapSet = null; sprites = [] }
+        let innerSb = if reverse then { innerSb with sprites = (inverseInstructions innerSb.sprites) } else innerSb
+        { sb with sprites = innerSb.sprites @ sb.sprites }
+
     // Push instruction (bad)
     let (>>|) s (i : T) =
         let sb = i {path = "err"; beatmapSet = null; sprites = [s] }
@@ -177,6 +188,12 @@ module SbMonad =
     let timeDivisionMap (timeStart : Time) (timeEnd : Time) (duration: Time) f =
         timeDivisionMapi timeStart timeEnd duration (fun _ -> f)
 
+    let timeSplitMapi (timeStart : Time) (timeEnd : Time) (count: int) =
+        let l = (timeEnd - timeStart) / count
+        let genSegment i = (i * l + timeStart, (i + 1) * l + timeStart)
+        let segments = [ for i in 0..count -> genSegment i]
+        monadicMapi segments
+
     let t (x : string) =
         let [|m; s; ms|] = x.Split(":")
         (int m) * 60000 + (int s) * 1000 + (int ms)
@@ -187,4 +204,5 @@ module SbMonad =
     let removeBg (sb : SB) =
         // Sprite,Background,TopLeft,"background.jpg",0,0
         let location = sb.beatmapSet.beatmaps[0].backgrounds[0].path
-        sb |> (img location >> origin TopLeft >> coords (0, 0) >> noCopy)
+        sb |> forEachDiff (fun _ -> img location >>= origin TopLeft >>= coords (0, 0) >>= noCopy)
+

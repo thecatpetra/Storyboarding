@@ -3,27 +3,43 @@
 
 namespace Storyboarding.Tools
 
-open System.Collections
+open System
+open System.Collections.Generic
 open System.IO
 open System.Text
 open MapsetParser.objects
 open SbMonad
-open Resources
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
-open Storyboarding.Tools.ImageFilters
 
 module SbCompiler =
+    let performRenaming (sb : SB) (rule : string -> string) =
+        let m = Dictionary<string, string>()
+        let sprites = sb.sprites |> List.filter (_.copy) |> List.map (fun s ->
+            if m.ContainsKey(s.name) |> not then m.Add(s.name, rule s.name)
+            assert(m.ContainsValue(m[s.name]))
+            {s with name = m[s.name]}
+        ) in {sb with sprites = sprites}, m
+
+    let mutable counter = 0
+    let rule (x: string) =
+        let ext = x.Split(".") |> Seq.last
+        counter <- counter + 1
+        let name = Convert.ToString(counter, 2).Replace("0", "I").Replace("1", "l")
+        $"{name}.{ext}"
+
     let ensureFiles (sb : SB) =
         let mapDirectory = FileInfo(sb.path).DirectoryName
         let sbDirectory = Path.Join(mapDirectory, "s")
+        let newSb, naming = performRenaming sb rule
         if Directory.Exists(sbDirectory) then
             Directory.Delete(sbDirectory, true)
         let copy path =
-            Directory.CreateDirectory(FileInfo(Path.Join(sbDirectory, path)).DirectoryName) |> ignore
-            File.Copy(Path.Join(resourcesFolder, path), Path.Join(sbDirectory, path), true)
+            Directory.CreateDirectory(FileInfo(Path.Join(sbDirectory, naming[path])).DirectoryName) |> ignore
+            File.Copy(Path.Join(resourcesFolder, path), Path.Join(sbDirectory, naming[path]), true)
         let files = sb.sprites |> Seq.filter (_.copy) |> Seq.map _.name |> Seq.distinct
         files |> Seq.iter copy
+        newSb
 
     let insertIntoComments (rendered : string) =
         let builder = StringBuilder()
@@ -103,7 +119,7 @@ module SbCompiler =
         let customCulture = System.Threading.Thread.CurrentThread.CurrentCulture.Clone() :?> System.Globalization.CultureInfo
         customCulture.NumberFormat.NumberDecimalSeparator <- ".";
         System.Threading.Thread.CurrentThread.CurrentCulture <- customCulture
-        ensureFiles sb
+        let sb = ensureFiles sb
 
         // let sb = resolveCustomCommands sb
         let nonDiffSpecific = sb.sprites |> Seq.filter _.difficulty.IsNone
