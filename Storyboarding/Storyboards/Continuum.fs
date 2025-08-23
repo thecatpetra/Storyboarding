@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Storyboards
 
+open System.Collections.Generic
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
 open Storyboarding.Tools
@@ -83,24 +84,29 @@ module Continuum =
                 else id)
             | _ -> id
 
-    let rec growingVineBreadth ts te (lines : ResizeArray<Segment>) point =
-        printfn $"Growing line {point}"
-        let diff = 1000
-        img gp_filled_circle >> coords point
-        >>= scale ts te 0.01f 0.01f
-        >>= match ts with
-            | ts when ts < te ->
-                let possible = List.choose (fun b ->
-                    let newPoint = point +++ (randInt -30 30, randInt -30 30)
-                    let inBounds (x, y) = -120 < x && x < 750 && -10 < y && y < 490
-                    let canGo = inBounds point && Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
-                    if not canGo then None
-                    else let () = (point, newPoint) |> lines.Add in Some newPoint) [1..9]
-                monadicMap possible (fun newPoint ->
-                    openingLine ts te diff point newPoint 0.02f
-                    >>= fade ts ts 0.5f 0.5f
-                    >>= growingVineDepth (ts + diff) te lines newPoint)
-            | _ -> id
+    // TODO: More functional (get the recursive BFS)
+    let growingVineBreadth ts te (lines : ResizeArray<Segment>) point =
+        let front = Queue<Position * Time>([point, ts])
+        let mutable storyboard = id
+        let diff = 100
+        while (front.Count > 0) do
+            let point, ts = front.Dequeue()
+            printfn $"Growing line {point}"
+            let possible = List.choose (fun b ->
+                let newPoint = point +++ (randInt -30 30, randInt -30 30)
+                let inBounds (x, y) = -120 < x && x < 750 && -10 < y && y < 490
+                let canGo = ts < te && inBounds point && Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
+                if not canGo then None
+                else let () = (point, newPoint) |> lines.Add in Some newPoint) [1..3]
+            possible |> List.iter (fun n -> front.Enqueue(n, ts + diff))
+            storyboard <- storyboard >>= img gp_filled_circle >> coords point
+                          >>= scale ts te 0.01f 0.01f
+            storyboard <- storyboard >>= monadicMap possible (fun newPoint ->
+                openingLine ts te diff point newPoint 0.02f
+                >>= fade ts ts 0.5f 0.5f
+                >>= color ts ts (190, 210, 250) (190, 210, 250)
+            )
+        storyboard
 
     let renderLyrics3 =
         let lyrics = [
