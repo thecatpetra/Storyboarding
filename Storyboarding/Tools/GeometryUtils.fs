@@ -123,3 +123,37 @@ module GeometryUtils =
         >>= color time (time + 1000) red red
         >>= scale time time 0.01f 0.01f
         >>= move time time position position
+
+    type FsPoint = { X: int; Y: int }
+
+    let checkIntersection (aX, aY) (bX, bY) (cX, cY) (dX, dY) =
+        let shrink a b =
+            (lerp a b 0.01f), (lerp a b 0.99f)
+
+        let (aX, aY), (bX, bY) = shrink (aX, aY) (bX, bY)
+        let (cX, cY), (dX, dY) = shrink (cX, cY) (dX, dY)
+
+        let crossProduct (p1: FsPoint) (p2: FsPoint) (p3: FsPoint) =
+            (p2.X - p1.X) * (p3.Y - p1.Y) - (p2.Y - p1.Y) * (p3.X - p1.X)
+
+        let onSegment (p1: FsPoint) (p2: FsPoint) (p: FsPoint) =
+            p.X <= max p1.X p2.X && p.X >= min p1.X p2.X &&
+            p.Y <= max p1.Y p2.Y && p.Y >= min p1.Y p2.Y
+
+        let doSegmentsIntersect (p1: FsPoint) (p2: FsPoint) (p3: FsPoint) (p4: FsPoint) =
+            let d1 = crossProduct p3 p4 p1
+            let d2 = crossProduct p3 p4 p2
+            let d3 = crossProduct p1 p2 p3
+            let d4 = crossProduct p1 p2 p4
+            if ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0)) then true
+            else if d1 = 0 && onSegment p3 p4 p1 then true
+            else if d2 = 0 && onSegment p3 p4 p2 then true
+            else if d3 = 0 && onSegment p1 p2 p3 then true
+            else d4 = 0 && onSegment p1 p2 p4
+
+        let a = { X = aX; Y = aY }
+        let b = { X = bX; Y = bY }
+        let c = { X = cX; Y = cY }
+        let d = { X = dX; Y = dY }
+
+        doSegmentsIntersect a b c d

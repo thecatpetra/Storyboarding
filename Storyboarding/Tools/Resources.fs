@@ -44,6 +44,7 @@ module Resources =
     let bg_mountains_sunset = fhd "bg/GXkwJB.jpg"
     let bg_campfire = fhd "bg/L4R68K.jpg"
     let bg_sidetracked_day = fhd "bg/Lgd00.jpg"
+    let bg_snow_mountain = fhd "bg/snow_mountain.jpg"
 
     let bg_hidamari_1 = "bg/hidamari/1.jpg"
     let bg_hidamari_2 = "bg/hidamari/2.jpg"

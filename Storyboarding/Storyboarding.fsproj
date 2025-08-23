@@ -26,6 +26,7 @@
         <Compile Include="Effects\FFTEffects.fs" />
         <Compile Include="Effects\MarchingSquares.fs" />
         <Compile Include="Effects\Cube.fs" />
+        <Compile Include="Effects\RealisticSnow.fs" />
         <Compile Include="Gameplay\Util.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />
@@ -38,6 +39,7 @@
         <Compile Include="Storyboards\Isolation.fs" />
         <Compile Include="Storyboards\HidamariNoUta.fs" />
         <Compile Include="Storyboards\SidetrackedDay.fs" />
+        <Compile Include="Storyboards\Continuum.fs" />
         <Compile Include="Program.fs" />
         <Folder Include="Scripts\" />
     </ItemGroup>

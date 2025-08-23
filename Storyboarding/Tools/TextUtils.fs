@@ -154,7 +154,7 @@ module TextUtils =
         monadicMapi [-1f; 0f; 1f] (fun i e -> inner (colorOfIndex i) (stride * e))
 
     let spinInOutMove stay diff time icf : CharAction = fun i image s p ->
-        let effectTime = 400
+        let effectTime = 200
         let c = icf i
         img image
         >>= move (time + i * diff) (time + i * diff + effectTime) p p

@@ -177,7 +177,9 @@ module SbMonad =
 
     let beatTime (time : int) (sb : SB) =
         let anyBm = sb.beatmapSet.beatmaps |> Seq.cast<Beatmap> |> Seq.head
-        anyBm.timingLines |> Seq.filter (fun x -> x.offset < time) |> Seq.last |> _.msPerBeat |> abs |> int
+        anyBm.timingLines |> Seq.filter (fun x -> x.offset < time) |> Seq.tryLast |> function
+            | Some r -> r.msPerBeat |> abs |> int
+            | None -> anyBm.timingLines |> Seq.head |> _.msPerBeat |> abs |> int
 
     let timeDivisionMapi (timeStart : Time) (timeEnd : Time) (duration: Time) =
         let segmentCount = timeEnd - timeStart |> fun diff -> diff / duration

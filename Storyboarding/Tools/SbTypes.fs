@@ -94,6 +94,9 @@ module SbTypes =
         let sqrt = float32 >> MathF.Sqrt >> int
         ((position |> fst |> square) + (position |> snd |> square)) |> sqrt
 
+    let angle (x, y) =
+        (x |> float32, y |> float32) ||> atan2
+
     let rotateBy r (x, y) =
         let xNew = (MathF.Cos(r) * (float32 x) - MathF.Sin(r) * (float32 y)) |> int
         let yNew = (MathF.Sin(r) * (float32 x) + MathF.Cos(r) * (float32 y)) |> int

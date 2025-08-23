@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Tools
 
+open System
 open System.IO
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Drawing
@@ -72,4 +73,24 @@ module ImageFilters =
             let r = new Image<Rgba32>(g.Width, g.Height)
             r.Mutate(fun x -> x.Fill(Color.White) |> ignore)
             r.Mutate(fun m -> m.DrawImage(g, GraphicsOptions(AlphaCompositionMode = PixelAlphaCompositionMode.Xor)) |> ignore)
+            r)
+
+    let randomGrouping size count path =
+        makeNewImage $"_rg{size}x{count}" path (fun g ->
+            let random = Random()
+            let r = new Image<Rgba32>(size, size)
+            r.Mutate(fun x -> x.Fill(Color.Transparent) |> ignore)
+            let boundary = size - g.Height * 2
+            assert(boundary > 0)
+            for _ in [1..count] do
+                let point = Point(random.Next(boundary) + g.Width, random.Next(boundary) + g.Height)
+                r.Mutate(fun m -> m.DrawImage(g, point, GraphicsOptions(AlphaCompositionMode = PixelAlphaCompositionMode.SrcOver)) |> ignore)
+            r)
+
+    let pad size path =
+        makeNewImage $"_pad{size}" path (fun g ->
+            let r = new Image<Rgba32>(size * 2 + g.Width, size * 2 + g.Height)
+            r.Mutate(fun x -> x.Fill(Color.Transparent) |> ignore)
+            let point = Point(size, size)
+            r.Mutate(fun m -> m.DrawImage(g, point, GraphicsOptions(AlphaCompositionMode = PixelAlphaCompositionMode.SrcOver)) |> ignore)
             r)
