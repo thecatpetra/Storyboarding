@@ -25,6 +25,7 @@ module Resources =
     let gradient = "effects/grad.png"
     let vignette = "effects/vignette_black.png"
     let screen_overlay = "effects/screen_overlay_2.png"
+    let rib = "effects/rib.png"
 
     let e_bubble i = $"effects/bubbles/bubble_{i}.png"
 
@@ -72,6 +73,7 @@ module Resources =
     let shape_cube = "effects/shapes/shape_cube.png"
     let shape_circle_chevron = "effects/shapes/shape_circle_chevron.png"
     let shape_square = "effects/shapes/shape_square.png"
+    let golden_spiral = "effects/shapes/golden_spiral.png"
 
     let ui_progressbar_long_out = "effects/ui/progressbar_long_outer.png"
     let ui_progressbar_out = "effects/ui/progressbar_outer.png"

@@ -229,66 +229,63 @@ module SidetrackedDay =
     let theStream bgStart ts te back =
         let sectionStart = ts
         let sectionEnd = te
-        let origin = (300, 220)
+        let center = (320, 240)
         let m = 4.311578947368421f
         let iteration = 1200
+        let overall = 0.04f
         let stay = iteration |> float32 |> (*) m |> int
-        let alphabet = "OI" |> Seq.map (fun i -> $"font/big_render/{int i}.png") |> Seq.toList
-        let randomShape ts te =
-            let shape = SbRandom.choice ((List.collect (List.replicate 15) [shape_triangle; shape_cross]) @ alphabet)
-            let topColor = SbRandom.choice [(248, 250, 146); (251, 169, 122); (217, 87, 63)]
-            let position = SbRandom.randEdgePosition() |> fun (x, y) -> (x * 6 / 5, y * 6 / 5)
-            let rotation = SbRandom.randFloat() |> (*) 2f |> (-) 1f
-            monadicMap [0f, (90, 90, 100); 1f, (111, 107, 125); 2f, (124, 119, 140); 3f, topColor] (fun (s, c) ->
-            let timeOffset = s |> (*) 15f |> int |> fun x -> if back then -x else x
-            let ts, te = ts - timeOffset, te - timeOffset
-            let s = 0.5f + s * 0.01f
-            img shape
-            >>= fade (ts + iteration * 8 / 3 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
-            >>= color (ts + iteration * 3 / 3 |> max sectionStart) (te - iteration |> min sectionEnd) c c
-            >>= rotate ts ts 0.04f rotation
-            >>= vectorScale ts te (0.002f, 0.002f) (s, s) >> easing Easing.ExpoIn
-            >>= move ts te origin position >> easing Easing.ExpoIn
-            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
         background (square_white |> oneTenthFhd) bgStart te
         >>= color ts te black dark
+        >>= (timeDivisionMapi ts (te + iteration * 2) (iteration / 4) (fun i (ts, _) ->
+            let ts = ts - iteration * 3
+            let te = (iteration |> float32 |> (*) 1.6180339887f |> (*) 2.233f |> int) + ts
+            let d = i % 4
+            let rotation = List.item d [1; 2; 3; 4] |> float32 |> (*) (MathF.PI / 2f) |> (+) overall
+            let spiral_scale = 0.5f
+            let mBy f (x, y) = ((x |> float32) * f |> int), ((y |> float32) * f |> int)
+            let x, y = (617, 209) |> rotateBy (rotation + MathF.PI) |> mBy (spiral_scale * 1.1138f)
+            let dist = (320 + x, 240 + y)
+            img golden_spiral
+            >>= scale ts te 0f spiral_scale >> easing Easing.ExpoIn
+            >>= rotate ts ts rotation rotation
+            >>= move ts te center dist >> easing Easing.ExpoIn
+            >>= ((ts < sectionStart) >?= fade sectionStart (sectionStart + 200) 0f 1f)
+            >>= ((te > sectionEnd) >?= fade sectionEnd (sectionEnd + 1) 1f 0f)
+        ))
         >>= (back >?< timeDivisionMapi ts (te - iteration * 3 / 2) iteration (fun i (ts, _) ->
-        let ts = ts - iteration * 2
-        let te = stay + ts
-        monadicMap [1..8] (fun _ ->
-        let rsOffset i = SbRandom.randInt 0 (iteration * i) |> (+) -iteration
-        randomShape (ts + rsOffset (1)) (te + rsOffset (3) + iteration))
-        // Vertical
-        >>= monadicMap [-12..11] (fun d ->
-        let d = d * 2 + 1
-        img square_white >> coords (320, 240)
-        >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
-        >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
-        >>= rotate ts ts 0.04f 0.04f
-        >>= vectorScale ts te (0.002f, 6f) (0.01f, 6f) >> easing Easing.ExpoIn
-        >>= move ts te origin (origin +++ (440 * d, 0)) >> easing Easing.ExpoIn
-        >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
-        // Horizontal
-        >>= monadicMap [-12..11] (fun d ->
-        let d = d * 2 + 1
-        img square_white >> coords (320, 240)
-        >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
-        >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
-        >>= rotate ts ts 0.04f 0.04f
-        >>= vectorScale ts te (8f, 0.002f) (8f, 0.02f) >> easing Easing.ExpoIn
-        >>= move ts te origin (origin +++ (0, 440 * d)) >> easing Easing.ExpoIn
-        >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))))
+            let ts = ts - iteration * 2
+            let te = stay + ts
+
+            monadicMap [-11..11] (fun d ->
+            let d = d * 2
+            img rib >> coords (320, 240)
+            >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
+            >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
+            >>= rotate ts ts (overall + MathF.PI / 2f) (overall + MathF.PI / 2f)
+            >>= vectorScale ts te (9f, 0.006f) (9f, 0.015f) >> easing Easing.ExpoIn
+            >>= move ts te center (center +++ (440 * d, 0)) >> easing Easing.ExpoIn
+            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
+
+            >>= monadicMap [-11..11] (fun d ->
+            let d = d * 2
+            img rib >> coords (320, 240)
+            >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
+            >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
+            >>= rotate ts ts overall overall
+            >>= vectorScale ts te (14f, 0.006f) (14f, 0.015f) >> easing Easing.ExpoIn
+            >>= move ts te center (center +++ (0, 440 * d)) >> easing Easing.ExpoIn
+            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))))
 
     let story =
         opening
         >>= signature
         >>= sectionOne
         >>= theStream (t "02:28:245") (t "02:28:245") (t "02:48:670") false
-        >>= theStream (t "04:11:649") (t "04:11:649" + 6902) (t "04:52:500") true
+        >>= theStream (t "04:11:649") (t "04:11:649") (t "04:52:500") false
         >>= playingStatus
         >>= timer
         >>= sectionsLore
-        >>= background vignette (t "0:0:0") (t "02:48:670") >> layer Foreground
+        >>= background vignette (t "0:0:0") (t "05:38:457") >> layer Foreground
 
     let make () =
         openSb path

@@ -15,6 +15,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        Continuum.make ()
+        SidetrackedDay.make ()
         signalSuccess()
         0

@@ -88,42 +88,52 @@ module Continuum =
     let growingVineBreadth ts te (lines : ResizeArray<Segment>) point =
         let front = Queue<Position * Time>([point, ts])
         let mutable storyboard = id
-        let diff = 100
+        let diff = 250
         while (front.Count > 0) do
             let point, ts = front.Dequeue()
             printfn $"Growing line {point}"
             let possible = List.choose (fun b ->
                 let newPoint = point +++ (randInt -30 30, randInt -30 30)
                 let inBounds (x, y) = -120 < x && x < 750 && -10 < y && y < 490
-                let canGo = ts < te && inBounds point && Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
+                let canGo = ts < (te - diff) && inBounds point && Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
                 if not canGo then None
                 else let () = (point, newPoint) |> lines.Add in Some newPoint) [1..3]
             possible |> List.iter (fun n -> front.Enqueue(n, ts + diff))
             storyboard <- storyboard >>= img gp_filled_circle >> coords point
-                          >>= scale ts te 0.01f 0.01f
+                          >>= scale ts te 0.006f 0.006f
+                          >>= color ts ts (255, 180, 160) (255, 160, 200)
+                          >>= fade ts te 0.5f 0.0f
             storyboard <- storyboard >>= monadicMap possible (fun newPoint ->
                 openingLine ts te diff point newPoint 0.02f
-                >>= fade ts ts 0.5f 0.5f
-                >>= color ts ts (190, 210, 250) (190, 210, 250)
+                >>= fade ts te 0.5f 0.0f
+                >>= color ts te (255, 180, 160) (255, 160, 200)
             )
         storyboard
 
-    let renderLyrics3 =
+    let renderLyrics3 ts =
+        let te = ts + (t "01:14:735") + 3000 - (t "01:06:281")
+        let tm = ts - t "01:06:281"
         let lyrics = [
-            t "01:06:281", "This process will mirror"
-            t "01:09:826", "Natural concepts"
-            t "01:12:830", "While guided by"
-            t "01:14:735", "Pre-written code"
+            t "01:06:281" + tm, "This process will mirror", -3, white
+            t "01:09:826" + tm, "Natural concepts", -1, white
+            t "01:12:830" + tm, "While guided by", 1, white
+            t "01:14:735" + tm, "Pre-written code", 3, red "Pre-written code"
         ]
-        3
+        let line (ts, l, h, icf) =
+            let effect = spinInOutMove (te - ts) 35 ts icf
+            let w = textWidth font_quicksand l 0.3f |> (/) 2f |> int |> (+) 320
+            text font_quicksand l effect (w, 240 + 10 * h) 0.3f
+        monadicMap lyrics line
 
     let story =
         background bg_snow_mountain 0 (t "00:52:644")
         >>= bgMovement 0 (t "00:52:644")
         >>= renderLyrics1
         >>= renderLyrics2
-        >>= growingVineBreadth 0 (t "03:40:644") (ResizeArray<Segment>()) (40, 40)
-        >>= RealisticSnow.effect 0 (t "00:52:644")
+        >>= renderLyrics3 (t "01:06:281")
+        >>= growingVineBreadth (t "00:47:463") (t "00:51:008") (ResizeArray<Segment>()) (320, 240)
+        >>= growingVineBreadth (t "00:59:190") (t "01:04:099") (ResizeArray<Segment>()) (456, 162)
+        >>= RealisticSnow.effect 0 (t "01:18:826")
 
     let make () = openSb path |> story |> SbCompiler.write
 
