@@ -27,6 +27,8 @@
         <Compile Include="Effects\MarchingSquares.fs" />
         <Compile Include="Effects\Cube.fs" />
         <Compile Include="Effects\RealisticSnow.fs" />
+        <Compile Include="Effects\Growth.fs" />
+        <Compile Include="Effects\AscendingParticles.fs" />
         <Compile Include="Gameplay\Util.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />

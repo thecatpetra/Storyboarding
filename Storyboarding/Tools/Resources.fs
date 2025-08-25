@@ -7,11 +7,12 @@ module Resources =
     let glow_ray = "effects/glow_ray.png"
     let glow_ray_rotated = "effects/glow_ray_rotated.png"
     let ineffective_light = "effects/light.png"
-    let light = "effects/light.png"
+    let light = "effects/light2.png"
     let light_dot = "effects/light_dot.png"
     let light_squashed = "effects/light_squashed.png"
     let light_thin = "effects/light_thin.png"
     let ping = "effects/ping.png"
+    let ping_thin = "effects/ping_thin.png"
     let grad_ray = "effects/grad_ray.png"
     let rain_drop_w = "effects/droplet_ring_w.png"
     let rain_drop_b = "effects/droplet_ring_b.png"
@@ -26,6 +27,8 @@ module Resources =
     let vignette = "effects/vignette_black.png"
     let screen_overlay = "effects/screen_overlay_2.png"
     let rib = "effects/rib.png"
+    let star = "effects/star.png"
+    let dot = "effects/dot.png"
 
     let e_bubble i = $"effects/bubbles/bubble_{i}.png"
 
@@ -44,7 +47,7 @@ module Resources =
     let bg_desert_sunset = fhd "bg/OmONLv.jpg"
     let bg_mountains_sunset = fhd "bg/GXkwJB.jpg"
     let bg_campfire = fhd "bg/L4R68K.jpg"
-    let bg_sidetracked_day = fhd "bg/Lgd00.jpg"
+    let bg_sidetracked_day = fhd "bg/n0mwQo.jpg"
     let bg_snow_mountain = fhd "bg/snow_mountain.jpg"
 
     let bg_hidamari_1 = "bg/hidamari/1.jpg"
@@ -73,6 +76,7 @@ module Resources =
     let shape_cube = "effects/shapes/shape_cube.png"
     let shape_circle_chevron = "effects/shapes/shape_circle_chevron.png"
     let shape_square = "effects/shapes/shape_square.png"
+    let shape_line = "effects/shapes/shape_line.png"
     let golden_spiral = "effects/shapes/golden_spiral.png"
 
     let ui_progressbar_long_out = "effects/ui/progressbar_long_outer.png"

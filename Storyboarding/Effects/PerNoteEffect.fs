@@ -4,6 +4,8 @@ open System
 open System.Numerics
 open MapsetParser.objects
 open Storyboarding.Tools
+open Storyboarding.Tools.ImageFilters
+open Storyboarding.Tools.Resources
 open Storyboarding.Tools.SbTypes
 open Storyboarding.Tools.SbMonad
 
@@ -13,9 +15,11 @@ module PerNoteEffect =
         endSize: float32
         lightColor: Color
         alpha: bool
+        image: string
     }
 
     type PingParams = {
+        image: string
         startSize: float32
         endSize: float32
         color: Color
@@ -42,19 +46,19 @@ module PerNoteEffect =
         Seq.item index colors |> (fun v -> (v.X |> int, v.Y |> int, v.Z |> int)) |> f
 
     let lightParamOfCombo (ho : HitObject) : LightParam option =
-        withComboColor ho (fun c -> Some { startSize = 0.9f; endSize = 0.3f; lightColor = c; alpha = true })
+        withComboColor ho (fun c -> Some { startSize = 2.4f; endSize = 1.4f; lightColor = c; alpha = true; image = (light |> resize1To 64) })
 
     let lightPingOfCombo (ho : HitObject) : PingParams option =
-        withComboColor ho (fun c -> Some { startSize = 0.1f; endSize = 1f; color = c; alpha = true })
+        withComboColor ho (fun c -> Some { startSize = 0.1f; endSize = 0.6f; color = c; alpha = true; image = (ping_thin |> resize1To 256) })
 
     let lightParamsOfColors cs (ho : HitObject) : LightParam option =
         assert (cs <> [])
         let index = ho.GetHitObjectIndex()
         let color = cs |> List.item (index % List.length cs)
-        Some { startSize = 0.1f; endSize = 1f; lightColor = color; alpha = true }
+        Some { startSize = 0.1f; endSize = 1f; lightColor = color; alpha = true; image = light }
 
-    let lightParamsOfColor c _ : LightParam option = { startSize = 1.5f; endSize = 1.2f; lightColor = c; alpha = true } |> Some
-    let pingParamsOfColor c _ : PingParams option = { startSize = 0.1f; endSize = 1f; color = c; alpha = true } |> Some
+    let lightParamsOfColor c _ : LightParam option = { startSize = 1.5f; endSize = 1.2f; lightColor = c; alpha = true; image = light } |> Some
+    let pingParamsOfColor c _ : PingParams option = { startSize = 0.1f; endSize = 1f; color = c; alpha = true; image = ping } |> Some
 
     let circleEffect (parameters : HitObject -> LightParam option) timeStart timeEnd =
         printfn $"Circle light effect ({timeStart}/{timeEnd})"
@@ -62,7 +66,7 @@ module PerNoteEffect =
         forEachHitObject (fun ho ->
         match parameters ho with
         | Some eff when ho.time >= timeStart && ho.time < timeEnd ->
-            img Resources.light
+            img eff.image
             >>= layer Layer.Foreground
             >>= move (ho.time) (ho.time) (p ho.Position) (p ho.Position)
             >>= scale (ho.time) (ho.time + 2000) eff.startSize eff.endSize
@@ -77,12 +81,12 @@ module PerNoteEffect =
         forEachHitObject (fun ho ->
         match parameters ho with
         | Some eff when ho.time >= timeStart && ho.time < timeEnd ->
-            img Resources.ping
+            img eff.image
             >>= layer Layer.Foreground
             >>= move (int ho.time) (int ho.time) (p ho.Position) (p ho.Position)
-            >>= scale (int ho.time) (int ho.time + 300) eff.startSize eff.endSize
+            >>= scale (int ho.time) (int ho.time + 600) eff.startSize eff.endSize
             >>= easing Easing.In
-            >>= fade (int ho.time) (int ho.time + 300) 0.6f 0f
+            >>= fade (int ho.time) (int ho.time + 600) 0.6f 0f
             >>= (eff.alpha >?= alpha)
             >>= color (int ho.time) (int ho.time) eff.color eff.color
         | _ -> id)
@@ -94,7 +98,7 @@ module PerNoteEffect =
         let rotation = (float32 (ho.Position.X - 256f)) / 800f
         match parameters ho with
         | Some eff when ho.time >= timeStart && ho.time < timeEnd ->
-            img Resources.grad_ray
+            img grad_ray
             >>= layer Layer.Foreground
             >>= move (int ho.time) (int ho.time) (p ho.Position) (p ho.Position)
             >>= vectorScale (int ho.time) (int ho.time) (3f, 20f) (3f, 20f)
@@ -113,7 +117,7 @@ module PerNoteEffect =
             let r = -MathF.PI / 2f + 0.05f
             let offset = r * 80f * MathF.Cos(r) |> int, r * 80f * MathF.Sin(r) |> int
             monadicMap [-1; 1] (fun d ->
-            img Resources.glow_ray_rotated >>= layer Layer.Foreground
+            img glow_ray_rotated >>= layer Layer.Foreground
             >>= move (int ho.time) (int ho.time + 450) (p ho.Position) (p ho.Position |> (+++) (d *** offset)) >> easing Easing.In
             >>= vectorScale (int ho.time) (int ho.time) (0.2f, 1.7f) (0.2f, 1.7f)
             >>= fade (int ho.time) (int ho.time + 450) 0.4f 0f

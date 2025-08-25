@@ -1,5 +1,8 @@
 ﻿namespace Storyboarding.Tools
 
+open System.IO
+open SixLabors.ImageSharp
+open SixLabors.ImageSharp.PixelFormats
 open Storyboarding.Tools.SbTypes
 
 module ColorUtils =
@@ -45,3 +48,16 @@ module ColorUtils =
         let s = if cMax = 0f then 0 else (diff / cMax |> int)
         let v = cMax * 100f |> int
         (h, s, v)
+
+    let withAccessPixelColors path (f : (fPosition -> SbTypes.Color) -> SbMonad.T) =
+        let fullPath = Path.Join(Paths.resourcesFolder, path)
+        use image = Image.Load<Rgba32>(fullPath)
+        let withAsserts (x, y) =
+            assert(0f <= x && x <= 1f)
+            assert(0f <= y && y <= 1f)
+            (x, y)
+        let readColor (x, y) =
+            let x, y = lerpTime 0 (image.Width - 2) x, lerpTime 0 (image.Height - 2) y
+            let col = image[x, y]
+            (col.R |> int, col.G |> int, col.B |> int)
+        f (withAsserts >> readColor)

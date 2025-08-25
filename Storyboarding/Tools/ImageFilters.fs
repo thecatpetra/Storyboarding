@@ -7,12 +7,12 @@ open SixLabors.ImageSharp.Drawing
 open SixLabors.ImageSharp.Drawing.Processing
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Processing
+open Storyboarding.Tools.SbTypes
 
 module ImageFilters =
     type ImageFilter = IImageProcessingContext -> unit
 
     let doOnImage suffix path f =
-
         let fullPath = Path.Join(Paths.resourcesFolder, path)
         let imageFileInfo = FileInfo(fullPath)
         let localPath = Path.GetFileNameWithoutExtension(fullPath) + $"{suffix}{imageFileInfo.Extension}"
@@ -56,6 +56,15 @@ module ImageFilters =
 
     let resize1To x path =
         doOnImage $"_r1s{x}" path (_.Mutate(fun o -> o.Resize(x, x) |> ignore))
+
+    let kodachrome path =
+        doOnImage $"_kdchr" path (_.Mutate(fun o -> o.Kodachrome() |> ignore))
+
+    let sepia path =
+        doOnImage $"_sp" path (_.Mutate(fun o -> o.Sepia() |> ignore))
+
+    let oilPaint path =
+        doOnImage $"_olpnt" path (_.Mutate(fun o -> o.OilPaint() |> ignore))
 
     let partialFills path =
         let partialFill radius =

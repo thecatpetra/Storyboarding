@@ -38,17 +38,18 @@ module Background =
 
     let bgLayerMovement (timeStart : Time) (timeEnd : Time) amplitude sb =
         printfn $"Calculating layer movement ({timeStart}/{timeEnd}/{amplitude})"
-        let beat = beatTime timeStart sb
+        let beat = beatTime 60000 sb
         let iterationTime = beat * 32
         let rotateDiff = 0.03f
-        let iteration i (ts, te) =
-            let position = float32 >> (*) 3.2f >> (+) 1.7f >> (fun i -> MathF.Cos(i) * amplitude |> int, MathF.Sin(i) * amplitude |> int) >> (+++) (320, 240)
+        let iteration =
+            let ts, te = 0, iterationTime * 2
+            let position = float32 >> (*) MathF.PI >> (+) 1.7f >> (fun i -> MathF.Cos(i) * amplitude |> int, MathF.Sin(i) * amplitude |> int) >> (+++) (320, 240)
             let rotation i = i % 2 |> float32 |> (-) 0.5f |> (*) rotateDiff
-            rotate ts te (rotation i) (rotation <| i + 1)
-            >> easing Easing.QuadInOut
-            >>= move ts te (position i) (position <| i + 1)
-            >> easing Easing.QuadInOut
-        timeDivisionMapi timeStart timeEnd iterationTime iteration sb
+            rotate ts iterationTime (rotation 0) (rotation 1) >> easing Easing.QuadInOut
+            >>= move ts iterationTime (position 0) (position 1) >> easing Easing.QuadInOut
+            >>= rotate iterationTime te (rotation 1) (rotation 0) >> easing Easing.QuadInOut
+            >>= move iterationTime te (position 1) (position 0) >> easing Easing.QuadInOut
+        loopTimeEnd timeStart timeEnd iteration sb
 
     let bgMovement (timeStart : Time) (timeEnd : Time) =
         printfn $"Making bg movement ({timeStart}/{timeEnd})"

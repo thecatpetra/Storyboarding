@@ -43,7 +43,7 @@ module SbTypes =
 
     type Time = int
 
-    type Instruction = {
+    type SimpleInstruction = {
         typ: InstructionType
         easing: Easing
         timeStart: Time
@@ -51,6 +51,12 @@ module SbTypes =
         iFrom: obj
         iTo: obj
     }
+
+    type Instruction =
+        | SimpleInstruction of SimpleInstruction
+        | Loop of LoopInstruction
+
+    and LoopInstruction = {startTime: Time; iterations: int; instructions: Instruction list}
 
     type Sprite = {
         name: string

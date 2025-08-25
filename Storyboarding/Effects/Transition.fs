@@ -1,6 +1,8 @@
 ﻿namespace Storyboarding.Effects
 
 open Storyboarding.Tools
+open Storyboarding.Tools.ColorUtils
+open Storyboarding.Tools.ImageFilters
 open Storyboarding.Tools.Resources
 open Storyboarding.Tools.SbMonad
 open Storyboarding.Tools.SbTypes
@@ -52,6 +54,15 @@ module Transition =
         >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
         >>= rotate openStart openEnd 0.01f 0.04f
 
-    let closingTriangles ts te openTime =
-        printfn $"Transition closing triangles ({ts}/{te}/{openTime})"
-        id
+    let closingSquares ts te openTime background =
+        withAccessPixelColors background (fun clr ->
+        printfn $"Transition closing squares ({ts}/{te}/{openTime})"
+        monadicMap [1..16] (fun y ->
+        monadicMap [-3..24] (fun x ->
+        let ts = ts + y * 40 + x * 60
+        let normalized = x |> float32 |> fun x -> (x + 3.5f) / 28f, y |> float32 |> (fun y -> (y - 0.5f) / 16f)
+        img square_white >>= coords (x * 32 - 16, y * 32 - 16) >> layer Foreground
+        >>= fade te (te + openTime) 1f 0f
+        >>= scale ts te 0f 0.25f >> easing Easing.QuadIn
+        >>= color (te - 800) te (clr normalized) (0, 0, 0) >> easing Easing.QuadIn
+        )))

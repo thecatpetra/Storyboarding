@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
+open Storyboarding.Effects.Growth
 open Storyboarding.Tools
 open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.GeometryUtils
@@ -18,15 +19,6 @@ module Continuum =
 
     let white = fun _ -> (240, 240, 255)
     let red x = indexedGradientT (255, 40, 80) (255, 80, 40) x |> toFun
-
-    let openingLine ts fin diff f t width =
-        let te = ts + diff
-        let dist = length (f --- t) |> float32 |> (*) 0.032f
-        let angle = - (angle (f --- t))
-        img (square_white |> resize1To 32) >> coords f >> origin TopCentre
-        >>= vectorScale ts te (width, 0f) (width, dist) >> easing Easing.SineInOut
-        >>= rotate ts ts angle angle
-        >>= fade ts fin 1f 1f
 
     let renderLyrics1 =
         let lyrics = [
@@ -61,54 +53,6 @@ module Continuum =
             text font_quicksand l effect (w, h) 0.3f
         monadicMap lyrics line
         >>= openingLine (t "00:52:917") (t "00:62:917") 800 (552, 107) (552, 175) 0.04f
-
-    type Segment = Position * Position
-
-    let rec growingVineDepth ts te (lines : ResizeArray<Segment>) point =
-        printfn $"Growing line {point}"
-        let diff = 1000
-        img gp_filled_circle >> coords point
-        >>= scale ts te 0.01f 0.01f
-        >>= match ts with
-            | ts when ts < te -> monadicMap [1..9] (fun b ->
-                let newPoint = point +++ (randInt -30 30, randInt -30 30)
-                let inBounds (x, y) = -120 < x && x < 750 && -10 < y && y < 490
-                let canGo =
-                    inBounds point &&
-                    Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
-                (point, newPoint) |> lines.Add
-                if canGo then
-                    openingLine ts te diff point newPoint 0.02f
-                    >>= fade ts ts 0.5f 0.5f
-                    >>= growingVineDepth (ts + diff) te lines newPoint
-                else id)
-            | _ -> id
-
-    // TODO: More functional (get the recursive BFS)
-    let growingVineBreadth ts te (lines : ResizeArray<Segment>) point =
-        let front = Queue<Position * Time>([point, ts])
-        let mutable storyboard = id
-        let diff = 250
-        while (front.Count > 0) do
-            let point, ts = front.Dequeue()
-            printfn $"Growing line {point}"
-            let possible = List.choose (fun b ->
-                let newPoint = point +++ (randInt -30 30, randInt -30 30)
-                let inBounds (x, y) = -120 < x && x < 750 && -10 < y && y < 490
-                let canGo = ts < (te - diff) && inBounds point && Seq.forall (fun (a, b) -> not <| checkIntersection point newPoint a b) lines
-                if not canGo then None
-                else let () = (point, newPoint) |> lines.Add in Some newPoint) [1..3]
-            possible |> List.iter (fun n -> front.Enqueue(n, ts + diff))
-            storyboard <- storyboard >>= img gp_filled_circle >> coords point
-                          >>= scale ts te 0.006f 0.006f
-                          >>= color ts ts (255, 180, 160) (255, 160, 200)
-                          >>= fade ts te 0.5f 0.0f
-            storyboard <- storyboard >>= monadicMap possible (fun newPoint ->
-                openingLine ts te diff point newPoint 0.02f
-                >>= fade ts te 0.5f 0.0f
-                >>= color ts te (255, 180, 160) (255, 160, 200)
-            )
-        storyboard
 
     let renderLyrics3 ts =
         let te = ts + (t "01:14:735") + 3000 - (t "01:06:281")

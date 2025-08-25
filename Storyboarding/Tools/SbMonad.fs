@@ -29,15 +29,16 @@ module SbMonad =
         | h :: tl -> {s with sprites = f h :: tl}
         | _ -> failwith "Operation on non-existent sprite"
 
-    let applyToLastInstruction f (s : SB) =
+    let applyToLastSimpleInstruction f (s : SB) =
         match s.sprites with
         | h :: tl ->
             let i =
                 match h.instructions with
-                | h :: tl -> f h :: tl
+                | (SimpleInstruction h) :: tl -> f h :: tl
                 | _ -> failwith "No instruction to apply to"
             {s with sprites = {h with instructions = i } :: tl}
         | _ -> failwith "Operation on non-existent sprite"
+
 
     let addInstruction genInstr (sb : SB) = {sb with sprites = addToLastSprite (genInstr sb) sb.sprites}
     let addSprite s (sb : SB) = {sb with sprites = s :: sb.sprites }
@@ -53,8 +54,11 @@ module SbMonad =
             let e = int e
             if e % 3 = 2 then enum<Easing> e else
             if e % 3 = 0 then enum<Easing> (e + 1) else enum<Easing> (e - 1)
-        let inverseInstructions (sprites : Sprite list) : Sprite list =
-            sprites |> List.map (fun (s : Sprite) -> {s with instructions = List.map (fun i -> {i with iTo = i.iFrom; iFrom = i.iTo; easing = inverseEasing i.easing}) s.instructions})
+        let rec inverseInstruction = function
+            | SimpleInstruction i -> SimpleInstruction {i with iTo = i.iFrom; iFrom = i.iTo; easing = inverseEasing i.easing}
+            | Loop l -> Loop {l with instructions = (List.map (fun (SimpleInstruction i) -> SimpleInstruction {i with iTo = i.iFrom; iFrom = i.iTo; easing = inverseEasing i.easing}) l.instructions)}
+        let rec inverseInstructions (sprites : Sprite list) : Sprite list =
+            sprites |> List.map (fun (s : Sprite) -> {s with instructions = List.map inverseInstruction s.instructions})
         let innerSb = f { path = "err"; beatmapSet = null; sprites = [] }
         let innerSb = if reverse then { innerSb with sprites = (inverseInstructions innerSb.sprites) } else innerSb
         { sb with sprites = innerSb.sprites @ sb.sprites }
@@ -93,13 +97,16 @@ module SbMonad =
                                   timeEnd = tEnd
                                   iFrom = iFrom
                                   iTo = iTo }
-        addInstruction genInstr
+        addInstruction (genInstr >> SimpleInstruction)
 
     let retrieveLastTo typ def f (sb : SB) =
         let lastSprite = sb.sprites |> Seq.tryHead
-        let viableInstruction = lastSprite |> Option.bind (fun s -> s.instructions |> Seq.tryFind (fun t -> t.typ = typ))
+        let viableInstruction = lastSprite |> Option.bind (fun s -> s.instructions |> Seq.tryFind (function
+            | SimpleInstruction t -> t.typ = typ
+            | Loop l -> false))
         match viableInstruction with
-        | Some v -> f v.iTo sb
+        | Some (SimpleInstruction v) -> f v.iTo sb
+        | Some (Loop v) -> f v.startTime sb
         | None -> f (def ()) sb
 
     let move = iBasic<Position> InstructionType.Move
@@ -111,7 +118,7 @@ module SbMonad =
     let vectorScale = iBasic<fPosition> InstructionType.VectorScale
     let color = iBasic<Color> InstructionType.Color
     let blur = iBasic<float32> InstructionType.Blur
-    let easing e = applyToLastInstruction (fun i -> {i with easing = e })
+    let easing e = applyToLastSimpleInstruction (fun i -> SimpleInstruction {i with easing = e })
     let layer l = applyToLastSprite (fun i -> {i with layer = l })
     let origin o = applyToLastSprite (fun i -> {i with origin = o })
 
@@ -128,14 +135,14 @@ module SbMonad =
 
     let parameter letter =
          let i sb =
-             let startTime = sb.sprites |> Seq.head |> _.instructions |> Seq.map _.timeStart |> Seq.min
+             let startTime = sb.sprites |> Seq.head |> _.instructions |> Seq.map (fun (SimpleInstruction s) -> s.timeStart) |> Seq.min
              { typ = InstructionType.Parameter
                easing = Easing.None
                timeStart = startTime
                timeEnd = startTime
                iFrom = letter
                iTo = null }
-         addInstruction i
+         addInstruction (i >> SimpleInstruction)
 
     let alpha = parameter "A"
     let horizontalFlip = parameter "H"
@@ -206,5 +213,30 @@ module SbMonad =
     let removeBg (sb : SB) =
         // Sprite,Background,TopLeft,"background.jpg",0,0
         let location = sb.beatmapSet.beatmaps[0].backgrounds[0].path
-        sb |> forEachDiff (fun _ -> img location >>= origin TopLeft >>= coords (0, 0) >>= noCopy)
+        sb |> (img location >>= origin TopLeft >>= coords (0, 0) >>= noCopy >>= fade 0 0 0f 0f)
 
+    let loopIterations timeStart iterations (f : T) : T = fun sb ->
+        let tempSb = { name = "Should not appear!"; layer = Layer.Background; difficulty = None; instructions = []; origin = Center; x = 320; y = 240; copy = true }
+        let tempSb = {sb with sprites = [tempSb]}
+        let addedInstructions = f tempSb |> _.sprites |> List.head |> _.instructions
+        let alteredSprites (sprites : Sprite list) =
+            match sprites with
+            | [] -> failwith "No sprite for loop as target"
+            | h :: tl -> { h with instructions = (Loop { startTime = timeStart; iterations = iterations; instructions = addedInstructions } :: h.instructions) } :: tl
+        let initial = sb.sprites.Length
+        assert(sb.sprites.Length = initial)
+        { sb with sprites = alteredSprites sb.sprites }
+
+    let loopTimeEnd timeStart timeEnd (f : T) : T = fun sb ->
+        let tempSb = { name = "Should not appear!"; layer = Layer.Background; difficulty = None; instructions = []; origin = Center; x = 320; y = 240; copy = true }
+        let tempSb = {sb with sprites = [tempSb]}
+        let addedInstructions = f tempSb |> _.sprites |> List.head |> _.instructions
+        let loopTime = addedInstructions |> List.map (fun (SimpleInstruction x) -> x.timeEnd) |> List.max
+        let iterations = (timeEnd - timeStart) / loopTime
+        let alteredSprites (sprites : Sprite list) =
+            match sprites with
+            | [] -> failwith "No sprite for loop as target"
+            | h :: tl -> { h with instructions = (Loop { startTime = timeStart; iterations = iterations; instructions = addedInstructions } :: h.instructions) } :: tl
+        let initial = sb.sprites.Length
+        assert(sb.sprites.Length = initial)
+        { sb with sprites = alteredSprites sb.sprites }

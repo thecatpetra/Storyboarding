@@ -15,10 +15,12 @@ open Storyboarding.Tools.SbTypes
 module SbCompiler =
     let performRenaming (sb : SB) (rule : string -> string) =
         let m = Dictionary<string, string>()
-        let sprites = sb.sprites |> List.filter (_.copy) |> List.map (fun s ->
-            if m.ContainsKey(s.name) |> not then m.Add(s.name, rule s.name)
-            assert(m.ContainsValue(m[s.name]))
-            {s with name = m[s.name]}
+        let sprites = sb.sprites |> List.map (fun s ->
+            if not s.copy then s
+            else
+                if m.ContainsKey(s.name) |> not then m.Add(s.name, rule s.name)
+                assert(m.ContainsValue(m[s.name]))
+                {s with name = m[s.name]}
         ) in {sb with sprites = sprites}, m
 
     let mutable counter = 0
@@ -26,7 +28,7 @@ module SbCompiler =
         let ext = x.Split(".") |> Seq.last
         counter <- counter + 1
         let name = Convert.ToString(counter, 2).Replace("0", "I").Replace("1", "l")
-        $"{name}.{ext}"
+        $"s/{name}.{ext}"
 
     let ensureFiles (sb : SB) =
         let mapDirectory = FileInfo(sb.path).DirectoryName
@@ -68,7 +70,7 @@ module SbCompiler =
             | Origin.TopLeft -> "TopLeft"
             | Origin.CentreRight -> "CentreRight"
             | Origin.CentreLeft -> "CentreLeft"
-        let writeInstruction (i : Instruction) =
+        let writeSimpleInstruction ident (i : SimpleInstruction) =
             let formatPosition (x, y) = $"{x},{y}"
             let formatColor (r, g, b) =
                 assert (r >= 0 && r < 256)
@@ -79,9 +81,9 @@ module SbCompiler =
                 assert(Easing.GetValues() |> Seq.contains e)
                 int32 e
             let inner code p1 p2 =
-                builder.AppendLine($" {code},{formatEasing i.easing},{i.timeStart},{i.timeEnd},{p1},{p2}") |> ignore
+                builder.AppendLine($"{ident}{code},{formatEasing i.easing},{i.timeStart},{i.timeEnd},{p1},{p2}") |> ignore
             let innerParameter code p1 =
-                builder.AppendLine($" {code},{formatEasing i.easing},{i.timeStart},{i.timeEnd},{p1}") |> ignore
+                builder.AppendLine($"{ident}{code},{formatEasing i.easing},{i.timeStart},{i.timeEnd},{p1}") |> ignore
             match i.typ with
             | Move -> inner "M" (formatPosition (i.iFrom :?> Position)) (formatPosition (i.iTo :?> Position))
             | MoveX -> inner "MX" i.iFrom i.iTo
@@ -93,9 +95,16 @@ module SbCompiler =
             | Parameter -> innerParameter "P" i.iFrom
             | Color -> inner "C" (formatColor (i.iFrom :?> Color)) (formatColor (i.iTo :?> Color))
             | _ -> failwith "Unsupported command for direct compilation"
+        let rec writeInstruction ident =
+            function
+            | SimpleInstruction s -> writeSimpleInstruction ident s
+            | Loop l ->
+                builder.AppendLine($"{ident}L,{l.startTime},{l.iterations}") |> ignore
+                List.iter (writeInstruction (ident + " ")) l.instructions
         let writeSprite (s : Sprite) =
-            builder.AppendLine($"Sprite,{layer s.layer},{origin s.origin},\"s/{s.name}\",{s.x},{s.y}") |> ignore
-            s.instructions |> Seq.rev |> Seq.iter writeInstruction
+            let prefix = if s.copy then "s/" else ""
+            builder.AppendLine($"Sprite,{layer s.layer},{origin s.origin},\"{prefix}{s.name}\",{s.x},{s.y}") |> ignore
+            s.instructions |> Seq.rev |> Seq.iter (writeInstruction " ")
         sprites |> Seq.rev |> Seq.iter writeSprite
         builder.ToString()
 
