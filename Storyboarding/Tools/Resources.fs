@@ -33,6 +33,7 @@ module Resources =
     let e_bubble i = $"effects/bubbles/bubble_{i}.png"
 
     let fhd = ImageFilters.resizeToFHD
+    let qhd = ImageFilters.resizeTo 2560 1440
 
     let bg_lights = fhd "bg/aa-lights.jpg"
     let bg_twins_upper = fhd "bg/LeKWYk_upper.jpg"
@@ -48,7 +49,11 @@ module Resources =
     let bg_mountains_sunset = fhd "bg/GXkwJB.jpg"
     let bg_campfire = fhd "bg/L4R68K.jpg"
     let bg_sidetracked_day = fhd "bg/n0mwQo.jpg"
-    let bg_snow_mountain = fhd "bg/snow_mountain.jpg"
+    let bg_snow_mountain = qhd "bg/snow_mountain.jpg"
+    let bg_sunmoonstars = fhd "bg/sunmoonstars.jpg"
+    let bg_isolation = qhd "bg/5ZqBg.jpg"
+    let bg_leaves = qhd "bg/leaves.jpg"
+    let bg_fern = fhd "bg/fern.jpg"
 
     let bg_hidamari_1 = "bg/hidamari/1.jpg"
     let bg_hidamari_2 = "bg/hidamari/2.jpg"
@@ -63,6 +68,10 @@ module Resources =
     let font_notoserif_jp = "font/NotoSerifJP-Light.ttf"
     let font_quicksand = "font/Quicksand-Light.ttf"
     let font_quicksand_bold = "font/Quicksand-SemiBold.ttf"
+    let font_jetbrains_mono = "font/JetBrainsMono-Light.ttf"
+    let font_smooch_sans = "font/SmoochSans-Light.ttf"
+    let font_quartez = "font/QuartezRegular.otf"
+    let font_forum = "font/Forum-Regular.ttf"
 
     let gp_simple_circle = "gameplay/simple_circle.png"
     let gp_simple_approach_circle = "gameplay/approach_circle.png"
@@ -81,3 +90,5 @@ module Resources =
 
     let ui_progressbar_long_out = "effects/ui/progressbar_long_outer.png"
     let ui_progressbar_out = "effects/ui/progressbar_outer.png"
+
+    let continuum_code = "effects/code/continuum.png"

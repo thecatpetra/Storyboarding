@@ -94,6 +94,7 @@ module SbTypes =
     let inline (+++) x = elementWise (+) x
 
     let inline ( *** ) (s: int) ((vx, vy) : Position) = vx * s, vy * s
+    let inline ( **** ) (s: float32) ((vx, vy) : Position) = (float32 vx) * s |> int, (float32 vy) * s |> int
 
     let length position =
         let square x = x * x

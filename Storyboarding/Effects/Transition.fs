@@ -12,7 +12,7 @@ module Transition =
     let dim startTime endTime fadeTime =
         printfn $"Transition dim ({endTime}/{fadeTime})"
         let allScreenScale = 10f
-        img square_black
+        img square_black >> layer Foreground
         >>= scale startTime startTime allScreenScale allScreenScale
         >>= fade startTime (startTime + fadeTime) 0f 1f
         >>= fade endTime endTime 1f 0f
@@ -54,15 +54,25 @@ module Transition =
         >>= vectorScale openStart openEnd (7f, 2f) (7f, 0f) >> easing Easing.QuartOut
         >>= rotate openStart openEnd 0.01f 0.04f
 
-    let closingSquares ts te openTime background =
+    let closingSquares ts te openTime background finalColor =
         withAccessPixelColors background (fun clr ->
         printfn $"Transition closing squares ({ts}/{te}/{openTime})"
         monadicMap [1..16] (fun y ->
         monadicMap [-3..24] (fun x ->
-        let ts = ts + y * 40 + x * 60
+        let ts = ts + y * 60 + x * 60 - 500
         let normalized = x |> float32 |> fun x -> (x + 3.5f) / 28f, y |> float32 |> (fun y -> (y - 0.5f) / 16f)
         img square_white >>= coords (x * 32 - 16, y * 32 - 16) >> layer Foreground
         >>= fade te (te + openTime) 1f 0f
         >>= scale ts te 0f 0.25f >> easing Easing.QuadIn
-        >>= color (te - 800) te (clr normalized) (0, 0, 0) >> easing Easing.QuadIn
+        >>= color (te - 800) te (clr normalized) finalColor >> easing Easing.QuadIn
         )))
+
+    let threeShuttingSquares ts openTime sb =
+        let beatTime = beatTime ts sb |> (*) 3
+        monadicMap [-1..1] (fun i ->
+        let te = ts + beatTime * 3
+        let ts = beatTime * (i + 1) + ts
+        img square_black >> coords (320 + i * 300, 240) >> layer Foreground
+        >>= vectorScale ts (ts + beatTime / 4) (0f, 4f) (2.345f, 4f)
+        >>= fade (te) (te + openTime) 1f 0f
+        ) sb

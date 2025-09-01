@@ -43,7 +43,7 @@ module SbMonad =
     let addInstruction genInstr (sb : SB) = {sb with sprites = addToLastSprite (genInstr sb) sb.sprites}
     let addSprite s (sb : SB) = {sb with sprites = s :: sb.sprites }
 
-    let (>>=) : T -> T -> T = fun f g sb -> f sb |> g
+    let inline (>>=) (f : T) (g : T) : T = fun sb -> f sb |> g
 
     let (>?=) : bool -> T -> T = fun choice f sb ->
         if choice then f sb
@@ -176,6 +176,10 @@ module SbMonad =
         forEachDiff (fun bm ->
         let sq = bm.hitObjects |> Seq.cast |> Seq.toList
         monadicMap sq f)
+
+    let forEachHitObjectOnDiff (diff: Beatmap) (f: HitObject -> T) =
+        let sq = diff.hitObjects |> Seq.cast |> Seq.toList
+        monadicMap sq f
 
     let getTimeDivisions (timeStart : Time) (timeEnd : Time) (duration: Time) =
         let segmentCount = timeEnd - timeStart |> fun diff -> diff / duration

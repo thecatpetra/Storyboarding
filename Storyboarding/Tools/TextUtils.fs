@@ -2,6 +2,7 @@
 
 open System.Diagnostics
 open System.IO
+open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
 open SbMonad
@@ -48,8 +49,9 @@ module TextUtils =
         image.Width
 
     let addX (x, y) b = (x + (int32 b), y)
+    let shiftWithAngle angle ((x, y) : fPosition) b = x + (cos angle |> (*) b), y + (sin angle |> (*) b)
 
-    let text font (txt : string) (charAction : CharAction) (position : Position) scale =
+    let textWithAngle angle font (txt : string) (charAction : CharAction) (position : Position) scale =
         let unicodes = txt |> Seq.toList |> List.map int
         // Lazy init font
         let fontFolder = Path.Join(resourcesFolder, font)
@@ -57,18 +59,23 @@ module TextUtils =
         ensureFont font
         if Directory.Exists(fontFolder) |> not || Directory.GetFiles fontFolder |> Array.length |> (=) 0 then
             createFont fontPath 64
+        let i2f position = position |> fst |> float32, position |> snd |> float32
+        let f2i position = position |> fst |> int, position |> snd |> int
         // TODO: Monadic map/fold
-        let rec inner currentPosition left i =
+        let rec inner (currentPosition: fPosition) left i =
             match left with
             | h :: tl ->
                 let image = Path.Join(font, $"{h}.png")
                 let fullPath = Path.Join(resourcesFolder, image)
                 let width = imageWidth fullPath
                 let diff = (float32 width) * scale
-                let act = charAction i image scale (addX currentPosition (diff / 2f))
-                act  >>= inner (addX currentPosition diff) tl (i + 1)
+                let act = charAction i image scale ((shiftWithAngle angle) currentPosition (diff / 2f) |> f2i)
+                act >>= inner ((shiftWithAngle angle) currentPosition diff) tl (i + 1)
             | [] -> id
-        inner position unicodes 0
+        inner (i2f position) unicodes 0
+
+    let text =
+        textWithAngle 0f
 
     let textWidth font (txt : string) (scale : float32) =
         let unicodes = txt |> Seq.toList |> List.map int
@@ -88,11 +95,13 @@ module TextUtils =
         let p = centreOfText font txt scale
         text font txt charAction p scale
 
-    let noEffect time : CharAction = fun _ image s p ->
+    let noEffect stay time diff icf : CharAction = fun i image s p ->
+        let time, c = time + i * diff, icf i
         img image
         >>= move time time p p
         >>= scale time time s s
-        >>= fade time (time + 10000) 1f 1f
+        >>= color time time c c
+        >>= fade time (time + stay) 1f 1f
 
     let chromoInOut stay diff time : CharAction = fun i image s p ->
         let stride = 3f
@@ -164,7 +173,7 @@ module TextUtils =
         >>= move (stay + time + i * diff) (stay + time + i * diff + effectTime) p p
         >>= vectorScale (stay + time + i * diff) (time + effectTime + stay + i * diff) (s, s) (0f, s)
         >> easing Easing.QuadOut
-        >>= alpha
+        // >>= alpha
 
     let flyInOutGeneric time icf tIn tOut tDiff = fun i image s p ->
         let d = ((SbRandom.randInt -3 3) - 3, (SbRandom.randInt 0 5) + 5)
@@ -184,3 +193,13 @@ module TextUtils =
         >>= scale ts ts s s
 
     let flyInOut time icf effectTime = flyInOutGeneric time icf effectTime effectTime 0
+
+
+    let textAndIcfsOfFile source colorMap stdColor =
+        let rec split2 txt clrs = function
+            | t :: c :: tl -> split2 (t :: txt) (c :: clrs) tl
+            | _ -> txt, clrs
+        let content = File.ReadAllLines(source)
+        let lines, colors = content |> Seq.toList |> split2 [] []
+        let icfs = colors |> List.map (fun c -> icfOfLineSafe (Seq.toList c) colorMap stdColor |> toFun)
+        List.zip lines icfs |> List.rev

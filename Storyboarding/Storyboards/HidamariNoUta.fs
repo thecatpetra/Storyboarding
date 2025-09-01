@@ -23,7 +23,7 @@ module HidamariNoUta =
                   t "01:38:478", "教えてもらった"
                   t "01:42:007", "コーヒーの味が"
                   t "01:45:537", "切ないくらいに"
-                  t "01:49:066", "を締め付ける"
+                  t "01:49:066", "胸を締め付ける"
                   ////
                   t "02:24:360", "創造出来ない"
                   t "02:27:890", "苦しみの中で"
@@ -39,10 +39,10 @@ module HidamariNoUta =
                    (t "02:06:713", "陽だまりの中に"), (t "02:10:243", "映りこむ")
                    (t "02:13:772", $"あなたの{char 12131}きてた"), (t "02:17:301", "その証")]
 
-    // do
-    //     let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
-    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
-    //     createFontSubset fontPath all_text 128
+    do
+        let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
+        let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
+        createFontSubset fontPath all_text 128
     // do
     //     let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
     //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
@@ -158,6 +158,7 @@ module HidamariNoUta =
         >>= nagai (t "03:03:184") >>= jikan (t "03:05:831")
         >>= nagai (t "03:08:478") >>= jikan (t "03:11:125")
         >>= imamo (t "03:14:213")
+        >>= doubleChromoFlash (t "03:15:095") (t "03:15:978") (t "03:15:978") 2000
 
     let silenceSection =
         let timeStart = t "03:43:772"

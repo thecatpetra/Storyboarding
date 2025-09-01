@@ -6,6 +6,7 @@ open Storyboarding.Effects.Background
 open Storyboarding.Effects.Cube
 open Storyboarding.Effects.FFTEffects
 open Storyboarding.Effects.PerNoteEffect
+open Storyboarding.Gameplay.UI
 open Storyboarding.Tools
 open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.ImageFilters
@@ -207,7 +208,7 @@ module SidetrackedDay =
     let sectionOne =
         let ya4Times = [t "00:49:947"; t "01:00:160"; t "01:10:372"; t "01:30:798"; t "01:41:011"; t "01:51:223"; t "02:01:436"; t "02:11:649"; t "02:21:862"]
         let ya2Times = [t "01:35:904"; t "01:46:117"; t "01:56:330"; t "02:06:542"; t "02:16:755"]
-        let dop3 = getTimeDivisions (t "00:41:011") (t "01:20:585") 2553 @ getTimeDivisions (t "01:26:968") (t "01:47:394") 2553
+        let dop3 = getTimeDivisions (t "00:41:011") (t "01:20:585") 2553 @ getTimeDivisions (t "01:26:968") (t "02:25:691") 2553
         background bg_sidetracked_day (t "00:41:011") (t "02:28:245")
         >>= bgMovement (t "00:41:011") (t "02:28:245")
         >>= background (bg_sidetracked_day |> gaussBlur 6f) (t "00:41:011") (t "00:43:564")
@@ -215,54 +216,7 @@ module SidetrackedDay =
         >>= monadicMap dop3 dopDopDop
         >>= monadicMap ya4Times yaYaYaYa
         >>= monadicMap ya2Times yaYa
-        >>= Transition.closingSquares (t "02:25:968") (t "02:28:245") 1000 bg_sidetracked_day
-
-    let timer =
-        let position = 635, 450
-        let final = t "05:34:628" |> (fun t -> t / 1000)
-        // 10 10 6 10 10
-        let singleDigitAnimation i timeStart timeEnd position =
-            let timeStart, timeEnd = timeStart * 1000 |> min (1000 * final), timeEnd * 1000 |> min (1000 * final)
-            img ($"{font_quicksand}/{48 + i}.png") >> layer Foreground
-            >>= move (timeStart - 350) timeStart (position +++ (0, 20)) position >> easing Easing.QuadOut
-                >>= fade (timeStart - 350) timeStart 0f 1f  >> easing Easing.QuadOut
-            >>= move (timeEnd - 350) timeEnd position (position +++ (0, -20)) >> easing Easing.QuadOut
-            >>= fade (timeEnd - 350) timeEnd 1f 0f >> easing Easing.QuadOut
-            >> scale timeStart timeStart 0.3f 0.3f
-        singleDigitAnimation 10 0 (534) (position +++ (29, 0))
-        >>= singleDigitAnimation 0 0 (534) (position +++ (10, 0))
-        >>= monadicMap [0..5] (fun minutes ->
-        let time = minutes * 60
-        time < final >?= singleDigitAnimation minutes time (time + 60) (position +++ (20, 0))
-        >>= monadicMap [0..5] (fun tenSeconds ->
-        let time = time + tenSeconds * 10
-        time < final >?= singleDigitAnimation tenSeconds time (time + 10) (position +++ (36, 0))
-        >>= monadicMap [0..9] (fun oneSecond ->
-            let time = time + oneSecond
-            time < final >?= singleDigitAnimation oneSecond time (time + 1) (position +++ (46, 0))
-        )))
-
-    let playingStatus =
-        let position = 550, 450
-        let startPosition = 463, 450
-        let endPosition = 635, 450
-        let endTime = t "05:34:628"
-        let c = third
-        img (ui_progressbar_long_out |> resizeTo 720 25) >> coords position >> layer Foreground
-        >>= scale 0 0 0.25f 0.25f
-        >>= fade 0 endTime 1f 1f
-        >> img (gp_filled_circle |> resize1To 10) >> coords startPosition >> layer Foreground
-        >>= scale 0 0 0.25f 0.25f
-        >>= fade 0 endTime 1f 1f
-        >>= color 0 0 c c
-        >> img (square_white |> resize1To 10) >> coords startPosition >> origin CentreLeft >> layer Foreground
-        >> vectorScale 0 endTime (0f, 0.25f) (17.2f, 0.25f)
-        >>= color 0 0 c c
-        >> img (gp_filled_circle |> resize1To 10) >> coords startPosition >> layer Foreground
-        >>= move 0 endTime startPosition endPosition
-        >>= scale 0 0 0.25f 0.25f
-        >>= fade 0 endTime 1f 1f
-        >>= color 0 0 c c
+        >>= Transition.closingSquares (t "02:25:968") (t "02:28:245") 1000 bg_sidetracked_day (0, 0, 0)
 
     let sectionsLore =
         let effect ts te = fun i image s p ->
@@ -290,55 +244,58 @@ module SidetrackedDay =
     let theStream bgStart ts te back =
         let sectionStart = ts
         let sectionEnd = te
-        let center = (282, 265)
+        let center = (320, 240)
         let m = 4.311578947368421f
         let iteration = 1200
         let overall = 0.04f
         let stay = iteration |> float32 |> (*) m |> int
-
+        let spiral_scale = 0.6f
         background (bg_sidetracked_day |> sepia |> gaussBlur 2f) bgStart te
         >>= color ts te dark (192, 192, 220)
 
-        >>= (timeDivisionMapi ts (te + iteration * 2) (iteration / 4) (fun i (ts, _) ->
-            let ts = ts - iteration * 3
-            let te = (iteration |> float32 |> (*) 1.6180339887f |> (*) 2.233f |> int) + ts
-            let d = i % 4
-            let rotation = List.item d [1; 2; 3; 4] |> float32 |> (*) (MathF.PI / 2f) |> (+) overall
-            let spiral_scale = 0.55f
+        // ts = ts - iteration * 3, end = te + iteration * 2
+        // freq = iteration / 4
+        // te = (iteration |> float32 |> (*) 1.6180339887f |> (*) 2.233f |> int) + ts
+        //
+
+        >>= monadicMap [0..3] (fun loopId ->
+        monadicMap [0..3] (fun i ->
+            let d = (iteration |> float32 |> (*) 1.6180339887f |> (*) 2.233f |> int)
+            let rotation = i + 1 |> float32 |> (*) (MathF.PI / 2f) |> (+) overall
             let mBy f (x, y) = ((x |> float32) * f |> int), ((y |> float32) * f |> int)
             let x, y = (617, 209) |> rotateBy (rotation + MathF.PI) |> mBy (spiral_scale * 1.1138f)
             let dist = (center |> fst |> (+) x, center |> snd |> (+) y)
             img golden_spiral
-            >>= scale ts te 0f spiral_scale >> easing Easing.ExpoIn
             >>= rotate ts ts rotation rotation
-            >>= move ts te center dist >> easing Easing.ExpoIn
-            >>= ((ts < sectionStart) >?= fade sectionStart (sectionStart + 200) 0f 1f)
-            >>= ((te > sectionEnd) >?= fade sectionEnd (sectionEnd + 1) 1f 0f)
+            >>= fade ts (ts + 300) 0f 1f
+            >>= loopTimeEnd (ts - iteration * 3 + i * iteration / 4 + loopId * iteration) (te + iteration * 3) (
+                scale 0 d 0f spiral_scale >> easing Easing.ExpoIn
+                >>= scale (d + 1) (d + 2) spiral_scale 0f
+                >>= move 0 d center dist >> easing Easing.ExpoIn
+                >>= move d (4 * iteration) dist (lerp dist center -2f))
+            >>= fade (te - 1000) te 1f 0f
         ))
 
-        >>= (back >?< timeDivisionMapi ts (te - iteration * 3 / 2) iteration (fun i (ts, _) ->
-            let ts = ts - iteration * 2
-            let te = stay + ts
-            // Horizontal
-            monadicMap [-11..11] (fun d ->
-            let d = d * 2
-            img rib >> coords (320, 240)
-            >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
-            >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
-            >>= rotate ts ts (overall + MathF.PI / 2f) (overall + MathF.PI / 2f)
-            >>= vectorScale ts te (9f, 0.006f) (9f, 0.015f) >> easing Easing.ExpoIn
-            >>= move ts te center (center +++ (440 * d, 0)) >> easing Easing.ExpoIn
-            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))
-            //Vertical
-            >>= monadicMap [-11..11] (fun d ->
-            let d = d * 2
-            img rib >> coords (320, 240)
-            >>= fade (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) 0f 1f
-            >>= color (ts + iteration * 3 / 2 |> max sectionStart) (te - iteration |> min sectionEnd) first fourth
-            >>= rotate ts ts overall overall
-            >>= vectorScale ts te (14f, 0.006f) (14f, 0.015f) >> easing Easing.ExpoIn
-            >>= move ts te center (center +++ (0, 440 * d)) >> easing Easing.ExpoIn
-            >>= (te > sectionEnd >?= fade sectionEnd sectionEnd 0f 0f))))
+        >>= monadicMap [-11..11] (fun positionMod ->
+        monadicMap [0..4] (fun loopId ->
+        img rib
+        >>= rotate ts ts (overall + MathF.PI / 2f) (overall + MathF.PI / 2f)
+        >>= loopTimeEnd (ts + (loopId - 2) * iteration) (te + iteration * 2) (
+            fade 0 (iteration * 3 / 2) 0f 0f
+            >>= fade (iteration * 3 / 2) (iteration * 5) 0f 1f
+            >>= color (iteration * 3 / 2) (stay - iteration) third fourth
+            >>= vectorScale 0 stay (9f, 0.009f) (9f, 0.015f) >> easing Easing.ExpoIn
+            >>= move 0 stay center (center +++ (440 * positionMod, 0)) >> easing Easing.ExpoIn
+        ) >>= fade (te - 1000) te 1f 0f
+        >>= img rib
+        >>= rotate ts ts (overall) (overall)
+        >>= loopTimeEnd (ts + (loopId - 2) * iteration) (te + iteration * 2) (
+            fade 0 (iteration * 3 / 2) 0f 0f
+            >>= fade (iteration * 3 / 2) (iteration * 5) 0f 1f
+            >>= color (iteration * 3 / 2) (stay - iteration) third fourth
+            >>= vectorScale 0 stay (14f, 0.009f) (14f, 0.015f) >> easing Easing.ExpoIn
+            >>= move 0 stay center (center +++ (0, 440 * positionMod)) >> easing Easing.ExpoIn
+        ) >>= fade (te - 1000) te 1f 0f))
 
         >>= pingEffect (onlyFirstCombo lightPingOfCombo) ts te
         >>= circleEffect lightParamOfCombo ts te
@@ -356,11 +313,11 @@ module SidetrackedDay =
         >>= monadicMap dop3 dopDopDopx3
         >>= monadicMap ya4Times yaYaYaYa
         >>= monadicMap ya3Times yaYaYa
-        >>= Transition.closingSquares (t "04:09:053") (t "04:11:649") 1000 bg_sidetracked_day
+        >>= Transition.closingSquares (t "04:09:053") (t "04:11:649") 1000 bg_sidetracked_day (0, 0, 0)
 
     let sectionThree =
-        let ya4Times = [t "04:56:330"; t "05:01:436"; t "05:06:542"; t "05:16:755"; t "05:26:968"]
-        let ya2Times = [t "05:11:649"; t "05:21:862"; t "05:32:074"]
+        let ya4Times = [t "04:56:330"; t "05:06:542"; t "05:16:755"; t "05:26:968"]
+        let ya2Times = [t "05:01:436"; t "05:11:649"; t "05:21:862"; t "05:32:074"]
         let dop1 = getTimeDivisions (t "04:52:500") (t "05:33:351") 2553
         background bg_sidetracked_day (t "04:52:500") (t "05:33:351")
         >>= bgMovement (t "04:52:500") (t "05:33:351")
@@ -370,7 +327,7 @@ module SidetrackedDay =
         >>= monadicMap ya4Times yaYaYaYa
         >>= monadicMap ya2Times yaYa
         >>= Transition.chromoFlash (t "04:49:947") (t "04:52:500") (t "04:52:500") 2000
-        >>= Transition.closingSquares (t "05:30:351") (t "05:33:351") 1000 bg_sidetracked_day
+        >>= Transition.closingSquares (t "05:30:351") (t "05:33:351") 1000 bg_sidetracked_day (0, 0, 0)
 
     let goodbye =
         let icf1 = indexedGradientT first third "Thank you"
@@ -385,7 +342,7 @@ module SidetrackedDay =
         >>= Transition.blackCurtains (t "00:38:457") (t "00:41:011") (t "00:41:011") (t "00:43:564")
         >>= signature
         >>= sectionOne
-        >>= AscendingParticles.effect (t "01:20:585") (t "01:26:968") dot (lerpColor third fourth)
+        >>= AscendingParticles.effect (t "01:20:585") (t "01:26:968") dot true (lerpColor third fourth)
         >>= theStream (t "02:28:245") (t "02:28:245") (t "02:48:670") false
         >>= Transition.blackCurtains (t "02:47:394") (t "02:48:670") (t "02:48:670") (t "02:48:670")
         >>= opening (t "02:48:670") (t "03:29:521")
@@ -393,10 +350,10 @@ module SidetrackedDay =
         >>= sectionTwo
         >>= Transition.blackCurtains (t "03:26:968") (t "03:29:521") (t "03:29:521") (t "03:30:798")
         >>= theStream (t "04:11:649") (t "04:11:649") (t "04:52:500") false
-        >>= AscendingParticles.effect (t "04:11:649") (t "04:52:500") dot (lerpColor third fourth)
+        >>= AscendingParticles.effect (t "04:11:649") (t "04:52:500") dot true (lerpColor third fourth)
         >>= sectionThree
-        >>= playingStatus
-        >>= timer
+        >>= playingStatus third (t "05:34:628")
+        >>= timer (t "05:34:628")
         >>= sectionsLore
         >>= background vignette (t "0:0:0") (t "05:38:457") >> layer Foreground
         >>= goodbye

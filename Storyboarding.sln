@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Delaunator", "Delaunator\De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDrawing", "FastDrawing\FastDrawing.csproj", "{3AD95244-6CCB-4831-B232-7F331F14C1E5}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GpuDrawingUtils", "GpuDrawingUtils\GpuDrawingUtils.fsproj", "{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{3AD95244-6CCB-4831-B232-7F331F14C1E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AD95244-6CCB-4831-B232-7F331F14C1E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD95244-6CCB-4831-B232-7F331F14C1E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

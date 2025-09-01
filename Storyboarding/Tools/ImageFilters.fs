@@ -1,7 +1,9 @@
 ﻿namespace Storyboarding.Tools
 
 open System
+open System.Drawing
 open System.IO
+open GpuDrawingUtils
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Drawing
 open SixLabors.ImageSharp.Drawing.Processing
@@ -11,6 +13,19 @@ open Storyboarding.Tools.SbTypes
 
 module ImageFilters =
     type ImageFilter = IImageProcessingContext -> unit
+
+    // Format: Key | Value
+    let imageFilterCache = "image_cache.txt"
+
+    let cache =
+        let lines = File.ReadAllLines(imageFilterCache)
+        lines |> Seq.map (_.Split(" | ", 2)) |> Seq.map (fun [|a; b|] -> a, b) |> dict
+
+    let writeToCache key value =
+        File.AppendAllLines(imageFilterCache, [$"{key} | {value}"])
+
+    let readCached key =
+        cache[key]
 
     let doOnImage suffix path f =
         let fullPath = Path.Join(Paths.resourcesFolder, path)
@@ -31,6 +46,15 @@ module ImageFilters =
         use image = Image.Load(fullPath)
         let r = f image
         r.Save(newFilename)
+        newFilename.Replace(Paths.resourcesFolder, "")
+
+    let makeNewImageNoSave suffix path (f: Image<Rgba32> -> String -> Unit) : String =
+        let fullPath = Path.Join(Paths.resourcesFolder, path)
+        let imageFileInfo = FileInfo(fullPath)
+        let localPath = Path.GetFileNameWithoutExtension(fullPath) + $"{suffix}{imageFileInfo.Extension}"
+        let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
+        use image = Image.Load<Rgba32>(fullPath)
+        if not <| File.Exists(newFilename) then f image newFilename
         newFilename.Replace(Paths.resourcesFolder, "")
 
     let commonFilter (filter : ImageFilter) suffix path =
@@ -59,6 +83,9 @@ module ImageFilters =
 
     let kodachrome path =
         doOnImage $"_kdchr" path (_.Mutate(fun o -> o.Kodachrome() |> ignore))
+
+    let negative path =
+        doOnImage $"_neg" path (_.Mutate(fun o -> o.Invert() |> ignore))
 
     let sepia path =
         doOnImage $"_sp" path (_.Mutate(fun o -> o.Sepia() |> ignore))
@@ -103,3 +130,37 @@ module ImageFilters =
             let point = Point(size, size)
             r.Mutate(fun m -> m.DrawImage(g, point, GraphicsOptions(AlphaCompositionMode = PixelAlphaCompositionMode.SrcOver)) |> ignore)
             r)
+
+    let cropImage path =
+        let fullPath = Path.Join(Paths.resourcesFolder, path)
+        let suffix = $"_cropped"
+        let imageFileInfo = FileInfo(fullPath)
+        let localPath = Path.GetFileNameWithoutExtension(fullPath) + $"{suffix}{imageFileInfo.Extension}"
+        let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
+        if File.Exists(newFilename) then
+            let size = readCached $"OFFSET OF {newFilename}" |> _.Split(", ") |> Seq.map int |> Seq.toList |> (fun [a; b] -> a, b)
+            size, newFilename.Replace(Paths.resourcesFolder, "")
+        else
+            use g = Image.Load<Rgba32>(fullPath)
+            let mutable minX = g.Width - 1
+            let mutable minY = g.Height - 1
+            let mutable maxX = 0
+            let mutable maxY = 0
+            for x in [0..g.Width-1] do
+                for y in [0..g.Height-1] do
+                    if g[x, y].A <> 0uy then
+                        minX <- min minX x
+                        minY <- min minY y
+                        maxX <- max maxX x
+                        maxY <- max maxY y
+            g.Mutate(fun g -> g.Crop(Rectangle(Point(minX, minY), Size(maxX - minX, maxY - minY))) |> ignore)
+            g.Save(newFilename)
+            writeToCache $"OFFSET OF {newFilename}" $"{minX}, {minY}"
+            (minX, minY), newFilename.Replace(Paths.resourcesFolder, "")
+
+    let renderTextToImage text anyImage size =
+        failwith "TODO"
+
+    let applyShader shader image =
+        let suffix = $"_shadered_{shader}"
+        makeNewImageNoSave suffix image (fun n g -> ShaderFilter.shaderFilter shader n g)

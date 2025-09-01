@@ -2,6 +2,7 @@
 
 open MapsetParser.objects
 open MapsetParser.objects.hitobjects
+open Storyboarding.Gameplay.Common
 open Storyboarding.Gameplay.Util
 open Storyboarding.Tools
 open Storyboarding.Tools.GeometryUtils
@@ -10,28 +11,7 @@ open Storyboarding.Tools.SbMonad
 
 module Lines =
     let circle (hitCircle : HitObject) =
-        let diffSettings = hitCircle.beatmap.difficultySettings
-        let textureScale = 0.0075f
-        let adjustedForCs = 54.4f - 4.48f * diffSettings.circleSize |> (*) textureScale
-        let position = hitCircle.Position.X |> int, hitCircle.Position.Y |> int
-        let circle = gp_simple_circle
-        let approach = gp_simple_approach_circle
-        let arData = arToTime diffSettings.approachRate
-        let time = hitCircle.time
-        let out = 500
-        let approachRateMod = 4f
-        let approachOut = 1.1f
-        img circle
-        >>= move time time position position
-        >>= scale time time adjustedForCs adjustedForCs
-        >>= fade (time - arData.preempt) (time - arData.fade_in) 0f 1f
-        >>= fade time (time + out) 1f 0f
-        >> img approach
-        >>= move time time position position
-        >>= fade (time - arData.preempt) time 0f 1f
-        >>= fade time (time + out) 1f 0f
-        >>= scale (time - arData.preempt) time (approachRateMod * adjustedForCs) adjustedForCs
-        >>= scale time (time + out) adjustedForCs (adjustedForCs * approachOut)
+        circle hitCircle { hitCircle = gp_simple_circle; approachCircle = gp_simple_approach_circle; scale = 0.4f }
 
     let sliderLine (slider : HitObject) =
         assert (slider.``type`` &&& HitObject.Type.Slider = HitObject.Type.Slider)

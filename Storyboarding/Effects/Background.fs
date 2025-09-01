@@ -24,6 +24,12 @@ module Background =
         >>= fade timeStart timeStart 0f 1f
         >>= fade timeEnd timeEnd 1f 0f
 
+    let backgroundRaw filename timeStart timeEnd =
+        printfn $"Making {filename} background"
+        let optimalSize = getOptimalSize filename
+        img filename
+        >>= scale timeStart timeStart 0f optimalSize
+
     let createTriangulation (points : Position list) : (Position * Position * Position) list =
         let translatedPoints = points |> List.map (fun e -> Delaunator.Models.Point(e |> fst |> float, e |> snd |> float))
         let pointArray = translatedPoints |> Seq.toArray
@@ -36,10 +42,10 @@ module Background =
         |> List.map Seq.toList
         |> List.map (fun [a; b; c] -> (pointToPosition a, pointToPosition b, pointToPosition c))
 
-    let bgLayerMovement (timeStart : Time) (timeEnd : Time) amplitude sb =
+    let bgLayerMovement (timeStart : Time) (timeEnd : Time) amplitude beatIteration sb =
         printfn $"Calculating layer movement ({timeStart}/{timeEnd}/{amplitude})"
         let beat = beatTime 60000 sb
-        let iterationTime = beat * 32
+        let iterationTime = beat * beatIteration
         let rotateDiff = 0.03f
         let iteration =
             let ts, te = 0, iterationTime * 2
@@ -53,8 +59,12 @@ module Background =
 
     let bgMovement (timeStart : Time) (timeEnd : Time) =
         printfn $"Making bg movement ({timeStart}/{timeEnd})"
-        bgLayerMovement timeStart timeEnd 8f
+        bgLayerMovement timeStart timeEnd 8f 32
+
+    let bgMovementSlow (timeStart : Time) (timeEnd : Time) =
+        printfn $"Making bg movement ({timeStart}/{timeEnd})"
+        bgLayerMovement timeStart timeEnd 8f 64
 
     let parallax (ts : Time) (te : Time) sprites =
         printfn $"Making parallax effect ({ts}/{te}/%A{sprites})"
-        monadicMap sprites (fun (sprite, amplitude) -> background sprite ts te >> bgLayerMovement ts te amplitude)
+        monadicMap sprites (fun (sprite, amplitude) -> background sprite ts te >> bgLayerMovement ts te amplitude 32)

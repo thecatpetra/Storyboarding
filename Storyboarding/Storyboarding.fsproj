@@ -12,10 +12,13 @@
         <Compile Include="Tools\Resources.fs" />
         <Compile Include="Tools\SbMonad.fs" />
         <Compile Include="Tools\SbRandom.fs" />
+        <Compile Include="Tools\ColorUtils.fs" />
         <Compile Include="Tools\TextUtils.fs" />
         <Compile Include="Tools\SbCompiler.fs" />
         <Compile Include="Tools\GeometryUtils.fs" />
-        <Compile Include="Tools\ColorUtils.fs" />
+        <Compile Include="Effects\LSystem\Types.fs" />
+        <Compile Include="Effects\LSystem\Parser.fs" />
+        <Compile Include="Effects\LSystem\Interpreter.fs" />
         <Compile Include="Effects\Background.fs" />
         <Compile Include="Effects\SbFFT.fs" />
         <Compile Include="Effects\RealisticSparks.fs" />
@@ -29,25 +32,28 @@
         <Compile Include="Effects\RealisticSnow.fs" />
         <Compile Include="Effects\Growth.fs" />
         <Compile Include="Effects\AscendingParticles.fs" />
+        <Compile Include="Effects\SubtleFog.fs" />
         <Compile Include="Gameplay\Util.fs" />
+        <Compile Include="Gameplay\Common.fs" />
         <Compile Include="Gameplay\Lines.fs" />
         <Compile Include="Gameplay\Bubbles.fs" />
-        <Compile Include="Gameplay\Isolation\Util.fs" />
-        <Compile Include="Storyboards\Honestly.fs" />
-        <Compile Include="Storyboards\Lamprey.fs" />
+        <Compile Include="Gameplay\UI.fs" />
+        <Compile Include="Gameplay\NormalGameplay.fs" />
         <Compile Include="Storyboards\TheWordsINeverSaid.fs" />
         <Compile Include="Storyboards\WithABurningHeart.fs" />
         <Compile Include="Storyboards\M.fs" />
-        <Compile Include="Storyboards\Isolation.fs" />
         <Compile Include="Storyboards\HidamariNoUta.fs" />
         <Compile Include="Storyboards\SidetrackedDay.fs" />
+        <Compile Include="Storyboards\TheSunTheMoonTheStars.fs" />
         <Compile Include="Storyboards\Continuum.fs" />
+        <Compile Include="Storyboards\Isolation.fs" />
         <Compile Include="Program.fs" />
         <Folder Include="Scripts\" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Delaunator\Delaunator.csproj" />
+      <ProjectReference Include="..\GpuDrawingUtils\GpuDrawingUtils.fsproj" />
       <ProjectReference Include="..\MapsetParser\MapsetParser.csproj" />
     </ItemGroup>
 

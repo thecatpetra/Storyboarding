@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Tools
 
+open System.Collections.Generic
 open System.IO
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
@@ -29,6 +30,25 @@ module ColorUtils =
         af + ag, fun i -> if i < af then f i else g (i - af)
 
     let (>>>>) = combine
+
+    let icfOfLineSafe content (colorMap: IDictionary<char, Color>) solid =
+        let rec inner = function
+            | c :: tl when colorMap.ContainsKey(c) -> indexedSolid colorMap[c] 1 >>>> inner tl
+            | c :: tl when List.contains c ['\n'; '\r'] -> inner tl
+            | _ :: tl -> indexedSolid solid 1 >>>> inner tl
+            | [] -> indexedSolid solid 10000
+        inner content
+
+    let icfOfLines content (colorMap: IDictionary<char, Color>) solid =
+        let rec inner = function
+            | c :: tl when colorMap.ContainsKey(c) -> indexedSolid colorMap[c] 1 >>>> inner tl
+            | c :: tl when List.contains c ['\n'; '\r'] -> inner tl
+            | _ :: tl -> indexedSolid solid 1 >>>> inner tl
+            | [] -> indexedSolid solid 1
+        inner content
+
+    let icfOfFile f =
+        File.ReadAllText(f) |> Seq.toList |> icfOfLines
 
     let hsv (red, green, blue) =
         let max3 a b c = max a b |> max c

@@ -1,0 +1,12 @@
+                                       
+let lifeCycle population world =       
+    let replicate =                    
+        List.replicate 4               
+        >> List.map mutateGenome       
+    population                         
+    |> Seq.map evaluateFitness world   
+    |> Seq.zip population              
+    |> Seq.sortBy fst                  
+    |> Seq.take 3                      
+    |> Seq.collect replicate           
+                                       

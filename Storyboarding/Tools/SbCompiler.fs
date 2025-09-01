@@ -28,7 +28,7 @@ module SbCompiler =
         let ext = x.Split(".") |> Seq.last
         counter <- counter + 1
         let name = Convert.ToString(counter, 2).Replace("0", "I").Replace("1", "l")
-        $"s/{name}.{ext}"
+        $"{name}.{ext}"
 
     let ensureFiles (sb : SB) =
         let mapDirectory = FileInfo(sb.path).DirectoryName
@@ -118,9 +118,9 @@ module SbCompiler =
             if line = "//Storyboard Layer 3 (Foreground)" then
                 ignoringLines <- true
                 result.AppendLine sbPart |> ignore
-            if line = "//Storyboard Layer 4 (Overlay)" then
+            if line = "//Storyboard Sound Samples" then
                 ignoringLines <- false
-                result.AppendLine "//Storyboard Layer 4 (Overlay)" |> ignore
+                result.AppendLine "//Storyboard Sound Samples" |> ignore
         let data = result.ToString()
         File.WriteAllText(bmPath, data)
 

@@ -1,6 +1,7 @@
 ﻿namespace Storyboarding
 
 open System.IO
+open GpuDrawingUtils
 open MapsetParser.objects
 open MapsetParser.objects.hitobjects
 open Storyboarding.Storyboards
@@ -15,6 +16,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        SidetrackedDay.make ()
+        HidamariNoUta.make ()
         signalSuccess()
         0
