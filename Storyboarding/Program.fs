@@ -10,12 +10,12 @@ open Storyboarding.Tools
 module Program =
     let signalSuccess () =
         let player = new System.Media.SoundPlayer()
-        player.SoundLocation <- @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\sound\bonk_ex.wav"
+        player.SoundLocation <- Paths.soundPath
         printfn $"Build finished, current time: {System.DateTime.Now}"
         player.PlaySync()
 
     [<EntryPoint>]
     let main args =
-        HidamariNoUta.make ()
+        Continuum.make ()
         signalSuccess()
         0

@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding.Storyboards
 
+open System
 open System.Collections.Generic
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
@@ -20,7 +21,7 @@ open System.IO
 // Of the given map as a representation of some "code"
 // I will not deviate
 module Continuum =
-    let path = @"C:\Users\arthur\AppData\Local\osu!\Songs\2423610 Kardashev - Continuum\Kardashev - Continuum (me2u).osb"
+    let path = @"D:\D\osu!\Songs\2423610 Kardashev - Continuum\Kardashev - Continuum (me2u).osb"
 
     let white = fun _ -> (240, 240, 255)
     let just color = indexedSolid color 10000 |> toFun
@@ -79,8 +80,8 @@ module Continuum =
         monadicMap lyrics line
 
     let renderCode ts te =
-        let source = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\code\self replication.fs_nolint"
-        let colors = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\code\self replication.colors.fs_nolint"
+        let source = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication.fs_nolint"
+        let colors = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication.colors.fs_nolint"
         // ['1', (30, 60, 120); '3', (40, 120, 30); '2', (90, 50, 80); '4', (90, 50, 128); '5', (64, 64, 64)]
         let icf = icfOfFile colors (dict ['1', (92, 169, 247)
                                           '3', (85, 230, 138)
@@ -88,9 +89,9 @@ module Continuum =
                                           '4', (195, 122, 255)
                                           '5', (204, 212, 219)]) (209, 209, 209) |> toFun
         let lyrics = File.ReadAllLines(source) |> Seq.toList
-        let fontDir = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\font\JetBrainsMono-Light.ttf\"
+        let fontDir = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\font\JetBrainsMono-Light.ttf\"
         let symbols = Directory.GetFiles(fontDir)
-                      |> Seq.map (_.Replace(@"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\", @""))
+                      |> Seq.map (_.Replace(@"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\", @""))
                       |> Seq.rev |> Seq.take 130
                       |> Seq.rev |> Seq.take 100
         let mutable collectedLength = 0
@@ -166,7 +167,7 @@ module Continuum =
             t "01:36:826", "--and ", just (255, 193, 122)
             t "01:37:126", "\"TECHNOLOGY.dat\"", just (227, 245, 255)
         ]
-        let logFile = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\code\self replication log.txt"
+        let logFile = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication log.txt"
         let colors = dict ['0', (255, 193, 122); '1', (227, 245, 255); '2', (118, 227, 149); '3', (162, 168, 171); '4', (217, 213, 132); '5', (170, 30, 40)]
         let log = textAndIcfsOfFile logFile colors (114, 120, 122)
         let ts, te = t "01:31:917", t "01:47:190"
@@ -205,13 +206,14 @@ module Continuum =
         >>= monadicMap [0..1] (fun _ -> RealisticSnow.effect (t "01:42:281") (t "02:35:188"))
 
     let story =
-        let _ = fractalLSystem 0 0 @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\code\fractal_tree1.lsystem"
         removeBg
         >>= firstPart
         >>= thisProcessWillMirror
         >>= theTheoryOfInfiniteLifelessness
         >>= initiateTheProcess
         >>= background vignette 0 (t "03:54:397") >> layer Foreground
+        >>= fractalLSystem (320f, 480f) (-MathF.PI / 2f - 1.2f) 0 20000 @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\fractal_tree2.lsystem"
+        
 
     let make () = openSb path |> story |> SbCompiler.write
 

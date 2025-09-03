@@ -1,0 +1,5 @@
+Axiom F
+Angle 60.0
+Distance 32.0
+X -> [ - F + F + F ] + F - F - F +
+F -> F X F

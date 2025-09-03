@@ -7,6 +7,8 @@ open Storyboarding.Tools.Resources
 open Storyboarding.Tools.SbMonad
 open Storyboarding.Tools.SbRandom
 open Storyboarding.Tools.SbTypes
+open Storyboarding.Effects.LSystem.Interpreter
+open Storyboarding.Effects.LSystem
 
 module Growth =
     type Segment = Position * Position
@@ -57,7 +59,10 @@ module Growth =
             )
         storyboard
 
-    let fractalLSystem ts te program =
+    let fractalLSystem ip ia ts te program =
         let lSystem = File.ReadAllText(program)
-        let r = LSystem.Parser.parse lSystem
-        r
+        let r = Parser.parse lSystem
+        match r with
+        | Parser.Parsed (p, []) -> drawExpression ip ia ts te p
+        | Parser.Failed (m1, m2) -> failwith $"{m1} | {m2}" 
+        | Parser.Parsed (p, t) -> failwith $"Not parsed: {t}"

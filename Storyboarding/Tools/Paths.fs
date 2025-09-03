@@ -1,7 +1,13 @@
 ﻿namespace Storyboarding.Tools
 
+open System.IO
+
 module Paths =
-    let resourcesFolder = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\"
-    let scriptPath = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Scripts"
-    let savePathPrefix = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Resources\font"
-    let fontsFolder = @"C:\Users\arthur\Documents\Storyboarding\Storyboarding\Fonts"
+    let projectPath x = Path.Join(@"C:\Users\arthu\Documents\Storyboarding\Storyboarding", x)
+
+    let soundPath = projectPath @"\Resources\sound\bonk_ex.wav"
+    let resourcesFolder = projectPath @"\Resources\"
+    let scriptPath = projectPath @"\Scripts"
+    let savePathPrefix = projectPath @"\Resources\font"
+    let fontsFolder = projectPath @"\Fonts"
+    let codeFolder = projectPath @"\Resources\code"

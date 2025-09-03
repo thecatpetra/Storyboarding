@@ -109,5 +109,10 @@ module SbTypes =
         let yNew = (MathF.Sin(r) * (float32 x) + MathF.Cos(r) * (float32 y)) |> int
         xNew, yNew
 
+    let rotateByF r (x, y) =
+        let xNew = (MathF.Cos(r) * (x) - MathF.Sin(r) * (y))
+        let yNew = (MathF.Sin(r) * (x) + MathF.Cos(r) * (y))
+        xNew, yNew
+
     let rotateAround rotation origin v =
         v +++ origin |> rotateBy rotation |> (+++) origin

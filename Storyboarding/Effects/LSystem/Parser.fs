@@ -98,7 +98,7 @@ module Parser =
         parseMany1 parseNonWhitespace >>= fun clst -> ret (implode clst)
 
     let parseStringList =
-        parseMany (parseString <<< skipWs) <<< skipLine
+        parseMany ((parseSymbol (isWhitespace >> not) >>= fun s -> ret $"{s}") <<< skipWs) <<< skipLine
 
     let parseRule : (LSystemChar * LSystemExpr) Parser =
         parseString <<< skipWs <* parseConst "->" () <<< skipWs >>= (fun i -> parseStringList <<< skipLine >>= (fun l -> ret (i, l)))
@@ -107,7 +107,7 @@ module Parser =
         (parseConst "Axiom" () <<< skipWs) *> parseStringList <<< skipLine
 
     let parseAngle : float32 Parser =
-        (parseConst "Angle" () <<< skipWs) *> parseFloat <<< skipLine
+        (parseConst "Angle" () <<< skipWs) *> parseFloat >>= fun a -> (a * MathF.PI / 180f |> ret) <<< skipLine
 
     let parseDistance : float32 Parser =
         (parseConst "Distance" () <<< skipWs) *> parseFloat <<< skipLine

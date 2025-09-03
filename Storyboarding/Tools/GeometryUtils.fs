@@ -165,6 +165,6 @@ module GeometryUtils =
         let dist = length (f --- t) |> float32 |> (*) 0.032f
         let angle = - (angle (f --- t))
         img (square_white |> resize1To 32) >> coords f >> origin TopCentre
-        >>= vectorScale ts te (width, 0f) (width, dist) >> easing Easing.SineInOut
         >>= rotate ts ts angle angle
         >>= fade ts fin 1f 1f
+        >>= vectorScale ts te (width, 0f) (width, dist) >> easing Easing.SineInOut
