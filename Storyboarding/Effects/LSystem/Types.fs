@@ -10,6 +10,7 @@ module LSystem =
     type LSystemProgram = {
         axiom: LSystemExpr
         rules: IDictionary<LSystemChar, LSystemExpr>
-        distance: float32
+        iterations: int
+        scale: float32
         angle: float32
     }

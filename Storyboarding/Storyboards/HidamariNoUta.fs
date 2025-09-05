@@ -14,7 +14,7 @@ open Storyboarding.Tools.SbTypes
 open Storyboarding.Tools.TextUtils
 
 module HidamariNoUta =
-    let path = @"C:\Users\arthur\AppData\Local\osu!\Songs\2420040 Apol - Hidamari no Uta\Apol - Hidamari no Uta (Asahina Oleshev).osb"
+    let path = @"D:\D\osu!\Songs\2420040 Apol - Hidamari no Uta\Apol - Hidamari no Uta (Asahina Oleshev).osb"
 
     let lyrics = [t "01:24:360", $"{char 12131}まれた事さえ"
                   t "01:27:890", "後悔するんだ"
@@ -43,10 +43,10 @@ module HidamariNoUta =
         let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
         let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
         createFontSubset fontPath all_text 128
-    // do
-    //     let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
-    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
-    //     createFontSubset fontPath all_text 128
+    do
+        let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
+        let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
+        createFontSubset fontPath all_text 128
 
     let doubleChromoFlash a b c d =
         chromoFlash a b c d

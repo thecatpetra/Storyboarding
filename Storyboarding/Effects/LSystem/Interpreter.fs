@@ -66,28 +66,28 @@ module Interpreter =
         let isInstruction x =
             List.contains x [ "F"; "B"; "+"; "-"; "["; "]" ]
 
-        inner 15 s |> List.filter isInstruction |> optimize [] None |> List.rev
+        inner program.iterations s |> List.filter isInstruction |> optimize [] None |> List.rev
 
     let drawExpression ip ia ts te (program: LSystemProgram) =
-        let scale = 2.7f
-        let forkTime = 1000
-        let iTime = 300
+        let s = program.scale
+        let forkTime = 500
+        let iTime = 3
         let fullExpr = resolveExpression program
         let f2i (x, y) = int x, int y
-        let rec inner m p r t i =
+        let rec inner mnd m p r t ti i =
             match i, m with
             | Forward n :: tl, _ ->
-                let np = p +++ (rotateByF r (scale * (float32 n), 0f))
-                openingLine t te (iTime) (f2i p) (f2i np) 0.03f >> easing Easing.None
-                >>= inner m np r (t + iTime) tl
+                let np = p +++ (rotateByF r (s * (float32 n), 0f))
+                let mnd = mnd >>= openingLine t te (iTime * n * ti) (f2i p) (f2i np) 0.03f >> easing Easing.None
+                inner mnd m np r (t + iTime * n * ti) ti tl
             | Backward n :: tl, _ ->
-                let np = p --- (rotateByF r (scale * (float32 n), 0f))
-                inner m np r t tl
-            | Save :: tl, _ -> inner ((p, r, t) :: m) p r (t + forkTime) tl
-            | Load :: tl, (lp, lr, tm) :: m -> inner m lp lr tm tl
+                let np = p --- (rotateByF r (s * (float32 n), 0f))
+                inner mnd m np r t ti tl
+            | Save :: tl, _ -> inner mnd ((p, r, t, ti) :: m) p r (t + forkTime) (ti + 1) tl
+            | Load :: tl, (lp, lr, tm, ti) :: m -> inner mnd m lp lr tm ti tl
             | Load :: _, [] -> failwith "Loading empty mem"
-            | Left :: tl, _ -> inner m p (r + program.angle) t tl
-            | Right :: tl, _ -> inner m p (r - program.angle) t tl
-            | [], _ -> id
-
-        inner [] ip ia ts fullExpr
+            | Left :: tl, _ -> inner mnd m p (r + program.angle) t ti tl
+            | Right :: tl, _ -> inner mnd m p (r - program.angle) t ti tl
+            | [], _ -> mnd
+        inner id [] ip ia ts 4 fullExpr
+        

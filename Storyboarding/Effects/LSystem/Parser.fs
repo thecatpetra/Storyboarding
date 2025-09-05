@@ -92,6 +92,10 @@ module Parser =
         parseSymbol ((=) '.') *> parseMany1 (parseSymbol isDigit) >>= fun second ->
         $"{implode first}.{implode second}" |> (float32 >> ret)
         <|> (parseMany1 (parseSymbol isDigit) >>= (implode >> float32 >> ret))
+    
+    let parseInt =
+        let isDigit x = x >= '0' && x <= '9'
+        (parseMany1 (parseSymbol isDigit) >>= (implode >> int >> ret))
 
     let parseString =
         let parseNonWhitespace = parseSymbol (isWhitespace >> not)
@@ -109,14 +113,18 @@ module Parser =
     let parseAngle : float32 Parser =
         (parseConst "Angle" () <<< skipWs) *> parseFloat >>= fun a -> (a * MathF.PI / 180f |> ret) <<< skipLine
 
-    let parseDistance : float32 Parser =
-        (parseConst "Distance" () <<< skipWs) *> parseFloat <<< skipLine
+    let parseIterations : int Parser =
+        (parseConst "Iterations" () <<< skipWs) *> parseInt <<< skipLine
+    
+    let parseScale: float32 Parser =
+        (parseConst "Scale" () <<< skipWs) *> parseFloat <<< skipLine
 
     let parseProgram : LSystemProgram Parser =
         parseAxiom <<< skipWs >>= fun axiom ->
         parseAngle <<< skipWs >>= fun angle ->
-        parseDistance <<< skipWs >>= fun distance ->
+        parseIterations <<< skipWs >>= fun iterations ->
+        parseScale <<< skipWs >>= fun scale ->
         parseMany parseRule >>= fun rules ->
-        ret { axiom = axiom; angle = angle; distance = distance; rules = dict rules }
+        ret { axiom = axiom; angle = angle; iterations = iterations; scale = scale; rules = dict rules }
 
     let parse<'a> = explode >> parseProgram

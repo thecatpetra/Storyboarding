@@ -212,7 +212,7 @@ module Continuum =
         >>= theTheoryOfInfiniteLifelessness
         >>= initiateTheProcess
         >>= background vignette 0 (t "03:54:397") >> layer Foreground
-        >>= fractalLSystem (320f, 480f) (-MathF.PI / 2f - 1.2f) 0 20000 @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\fractal_tree2.lsystem"
+        >>= fractalLSystem (600f, 480f) (-MathF.PI / 2f - 1.5f) 0 20000 @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\fractal_tree2.lsystem"
         
 
     let make () = openSb path |> story |> SbCompiler.write

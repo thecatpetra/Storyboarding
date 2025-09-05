@@ -1,5 +1,6 @@
-Axiom F
+Axiom F + F + F
 Angle 60.0
-Distance 32.0
+Iterations 6
+Scale 5.0
 X -> [ - F + F + F ] + F - F - F +
 F -> F X F

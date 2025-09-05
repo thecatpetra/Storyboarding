@@ -16,6 +16,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        Continuum.make ()
+        HidamariNoUta.make ()
         signalSuccess()
         0

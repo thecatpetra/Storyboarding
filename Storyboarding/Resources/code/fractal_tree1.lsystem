@@ -1,6 +1,7 @@
 Axiom aF
 Angle 12.0
-Distance 32.0
+Iterations 35
+Scale 1.9
 a -> FFFFFy[++++n][----t]fb
 b -> +FFFFFy[++++n][----t]fc
 c -> FFFFFy[++++n][----t]fd
