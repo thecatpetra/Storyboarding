@@ -2,7 +2,6 @@
 
 open System
 open System.Linq
-open Spectrogram
 open NAudio.Wave
 open Storyboarding.Tools.SbMonad
 open Storyboarding.Tools.SbTypes
@@ -30,22 +29,23 @@ module SbFFT =
 
 
     let withFft (f : FftResult -> T) sb =
-        printfn $"Calculating FFT for {sb.beatmapSet.beatmaps[0].metadataSettings.titleUnicode}"
-        let audio, sampleRate, length = readMono sb
-        let sg = SpectrogramGenerator(sampleRate, fftSize=4096, stepSize=441, maxFreq=3000)
-        sg.Add(audio, process=false)
-        let processed = sg.Process()
-        let collectArea x y xArea yArea =
-            let inBounds s x = 0 <= x && x < s
-            let xIndices = [x-xArea..x+xArea] |> List.filter (inBounds processed.Length)
-            let yIndices = [y-yArea..y+yArea] |> List.filter (inBounds processed[0].Length)
-            let areaCount = (xIndices |> List.length) * (yIndices |> List.length) |> float32
-            let areaSum = List.fold (fun t1 x -> t1 + List.fold (fun t0 y -> t0 + (processed[x][y] |> float32)) 0f yIndices) 0f xIndices
-            if (areaCount = 0f) then printfn "Warning! Very bad area!"
-            areaSum / areaCount
-        let getValue (time : Time) (freq : float32) =
-            let x = ((float32 time - 500f) / (float32 length)) * (float32 processed.Length) |> int
-            let y = freq * (float32 processed[0].Length) |> int
-            let average = collectArea x y 4 2
-            20f * MathF.Log(average, 3f)
-        f getValue sb
+        failwith "TODO: SPECTROGRAM FOR MAC"
+        // printfn $"Calculating FFT for {sb.beatmapSet.beatmaps[0].metadataSettings.titleUnicode}"
+        // let audio, sampleRate, length = readMono sb
+        // let sg = SpectrogramGenerator(sampleRate, fftSize=4096, stepSize=441, maxFreq=3000)
+        // sg.Add(audio, process=false)
+        // let processed = sg.Process()
+        // let collectArea x y xArea yArea =
+        //     let inBounds s x = 0 <= x && x < s
+        //     let xIndices = [x-xArea..x+xArea] |> List.filter (inBounds processed.Length)
+        //     let yIndices = [y-yArea..y+yArea] |> List.filter (inBounds processed[0].Length)
+        //     let areaCount = (xIndices |> List.length) * (yIndices |> List.length) |> float32
+        //     let areaSum = List.fold (fun t1 x -> t1 + List.fold (fun t0 y -> t0 + (processed[x][y] |> float32)) 0f yIndices) 0f xIndices
+        //     if (areaCount = 0f) then printfn "Warning! Very bad area!"
+        //     areaSum / areaCount
+        // let getValue (time : Time) (freq : float32) =
+        //     let x = ((float32 time - 500f) / (float32 length)) * (float32 processed.Length) |> int
+        //     let y = freq * (float32 processed[0].Length) |> int
+        //     let average = collectArea x y 4 2
+        //     20f * MathF.Log(average, 3f)
+        // f getValue sb

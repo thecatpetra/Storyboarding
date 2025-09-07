@@ -1,11 +1,9 @@
 ﻿namespace Storyboarding.Storyboards
 
 open System
-open System.Collections.Generic
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
 open Storyboarding.Effects.Growth
-open Storyboarding.Storyboards.TheSunTheMoonTheStars
 open Storyboarding.Tools
 open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.GeometryUtils
@@ -21,12 +19,15 @@ open System.IO
 // Of the given map as a representation of some "code"
 // I will not deviate
 module Continuum =
+    let macPath = @"/private/var/folders/pt/x9vg_x6s3pd5x6g8_33lbv500000gn/T/e039fa9473856437c9e5ac02221091450668067e1eefbce0fd2645d22e865279/Kardashev - Continuum (me2u).osb"
     let path = @"D:\D\osu!\Songs\2423610 Kardashev - Continuum\Kardashev - Continuum (me2u).osb"
 
     let white = fun _ -> (240, 240, 255)
     let just color = indexedSolid color 10000 |> toFun
     let black = fun _ -> (2, 4, 10)
     let red x = indexedGradientT (255, 40, 80) (255, 80, 40) x |> toFun
+    let redT = indexedGradientT (255, 40, 80) (255, 80, 40)
+    let whiteI = indexedSolid (white ())
     
     let mainfont = font_forum
 
@@ -80,8 +81,8 @@ module Continuum =
         monadicMap lyrics line
 
     let renderCode ts te =
-        let source = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication.fs_nolint"
-        let colors = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication.colors.fs_nolint"
+        let source = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication.fs_nolint"
+        let colors = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication.colors.fs_nolint"
         // ['1', (30, 60, 120); '3', (40, 120, 30); '2', (90, 50, 80); '4', (90, 50, 128); '5', (64, 64, 64)]
         let icf = icfOfFile colors (dict ['1', (92, 169, 247)
                                           '3', (85, 230, 138)
@@ -89,9 +90,9 @@ module Continuum =
                                           '4', (195, 122, 255)
                                           '5', (204, 212, 219)]) (209, 209, 209) |> toFun
         let lyrics = File.ReadAllLines(source) |> Seq.toList
-        let fontDir = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\font\JetBrainsMono-Light.ttf\"
+        let fontDir = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/font/JetBrainsMono-Light.ttf/"
         let symbols = Directory.GetFiles(fontDir)
-                      |> Seq.map (_.Replace(@"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\", @""))
+                      |> Seq.map (_.Replace(@"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/", @""))
                       |> Seq.rev |> Seq.take 130
                       |> Seq.rev |> Seq.take 100
         let mutable collectedLength = 0
@@ -141,7 +142,7 @@ module Continuum =
             let endTime = time + stay
             let time, c = time + i * diff, icf i
             let folder = image.Replace(FileInfo(image).Name, "")
-            if image.EndsWith("\\43.png") then
+            if image.EndsWith("/43.png") then
                 let switchTime = time + ((i - 28) * 60) + j * 600
                 img (folder + "/45.png")
                 >>= move time time p p
@@ -167,7 +168,7 @@ module Continuum =
             t "01:36:826", "--and ", just (255, 193, 122)
             t "01:37:126", "\"TECHNOLOGY.dat\"", just (227, 245, 255)
         ]
-        let logFile = @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\self replication log.txt"
+        let logFile = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication log.txt"
         let colors = dict ['0', (255, 193, 122); '1', (227, 245, 255); '2', (118, 227, 149); '3', (162, 168, 171); '4', (217, 213, 132); '5', (170, 30, 40)]
         let log = textAndIcfsOfFile logFile colors (114, 120, 122)
         let ts, te = t "01:31:917", t "01:47:190"
@@ -201,19 +202,56 @@ module Continuum =
         >>= RealisticSnow.effect 0 (t "01:04:735")
 
     let theTheoryOfInfiniteLifelessness =
+        // TODO: FIX FADING OF VINE!!!
+        let lyrics1 = [
+            t "01:48:008", "The theory", 0, white
+            t "01:50:190", "of infinite lifelessness", 1, (whiteI 3 >>>> redT "infinite lifelessness") |> toFun
+            t "01:56:734", "Replaced by the certainty", 3, white
+            t "02:00:007", "of infinite abundance", 4, (whiteI 3 >>>> redT "infinite lifelessness") |> toFun
+        ]
+        let lyrics2 = [
+            t "02:05:461", "No longer", 6, white
+            t "02:07:643", "a race of complacency.", 7, white
+            t "02:14:189", "They grasp at the powers of", 9, white
+            t "02:17:734", "opportunity", 10, red "opportunity"
+        ]
+        let line (ts, l, h, icf) =
+            let te = t "02:21:552"
+            let effect = spinInOutMove (te - ts) 35 ts icf
+            let w = textWidth mainfont l 0.3f |> (/) 2f |> int |> (+) 96
+            text mainfont l effect (w, 115 + 25 * h) 0.3f
         background bg_snow_mountain (t "01:47:190") (t "02:35:188")
         >>= bgMovementSlow (t "01:47:190") (t "02:35:188")
         >>= monadicMap [0..1] (fun _ -> RealisticSnow.effect (t "01:42:281") (t "02:35:188"))
+        >>= monadicMap (lyrics1 @ lyrics2) line
+        >>= openingLine (t "01:48:008") (t "02:21:552") 800 (90, 105) (90, 150) 0.04f
+        >>= openingLine (t "01:56:734") (t "02:21:552") 800 (90, 180) (90, 225) 0.04f
+        >>= openingLine (t "02:05:461") (t "02:21:552") 800 (90, 255) (90, 300) 0.04f
+        >>= openingLine (t "02:05:461") (t "02:21:552") 800 (90, 330) (90, 375) 0.04f
+        >>= growingVineBreadth (t "01:48:008") (t "02:21:552") (ResizeArray<_>()) (0, 0) (255, 180, 160)
+        >>= fractalLSystem (600f, 480f) (-MathF.PI / 2f - 1.5f) (t "01:48:008") (t "02:21:552") @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/fractal_tree2.lsystem"
 
+
+    let intro =
+        // In small rectangle mapper storyboarder
+        // Plant growing from the edge (600 480)
+        // Gradually color from 60 60 60 to 200 200 200
+        id
+    
     let story =
         removeBg
         >>= firstPart
         >>= thisProcessWillMirror
         >>= theTheoryOfInfiniteLifelessness
         >>= initiateTheProcess
+        // 02:21:467 - 02:35:188 (red bg, usual everything)
+        // 02:35:188 - 02:48:279 (shaking red bg, like in other sb)
+        // 02:48:279 - 03:15:278 (game of life and blackish bg)
+        // 03:15:278 - 03:21:823 (some flower as in the opening, blue bg)
+        // 03:21:823 - 03:41:459 effects on notes (self replication)
+        // 03:41:459 - end red bg outro
+        // Somewhere planet
         >>= background vignette 0 (t "03:54:397") >> layer Foreground
-        >>= fractalLSystem (600f, 480f) (-MathF.PI / 2f - 1.5f) 0 20000 @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\fractal_tree2.lsystem"
-        
 
-    let make () = openSb path |> story |> SbCompiler.write
+    let make () = openSb macPath |> story |> SbCompiler.write
 

@@ -12,4 +12,6 @@ obj/
 # Fonts to be rendered separately
 ./Storyboarding/Resources/font/*
 
+.DS_Store
+
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore

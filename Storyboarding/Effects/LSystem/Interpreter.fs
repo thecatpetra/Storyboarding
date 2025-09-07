@@ -70,15 +70,18 @@ module Interpreter =
 
     let drawExpression ip ia ts te (program: LSystemProgram) =
         let s = program.scale
-        let forkTime = 500
-        let iTime = 3
+        let forkTime = 2500
+        let iTime = 10
         let fullExpr = resolveExpression program
         let f2i (x, y) = int x, int y
         let rec inner mnd m p r t ti i =
             match i, m with
             | Forward n :: tl, _ ->
                 let np = p +++ (rotateByF r (s * (float32 n), 0f))
-                let mnd = mnd >>= openingLine t te (iTime * n * ti) (f2i p) (f2i np) 0.03f >> easing Easing.None
+                let mnd = mnd >>= openingLine t te (iTime * n * ti) (f2i p) (f2i np) 0.03f
+                          >> easing Easing.None
+                          // >> alpha
+                          >>= fade t t 0.2f 0.2f
                 inner mnd m np r (t + iTime * n * ti) ti tl
             | Backward n :: tl, _ ->
                 let np = p --- (rotateByF r (s * (float32 n), 0f))

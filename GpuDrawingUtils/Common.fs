@@ -2,8 +2,6 @@
 
 open System
 open System.Collections.Generic
-open System.Drawing
-open System.Drawing.Imaging
 open System.IO
 open System.Numerics
 open OpenTK.Graphics.OpenGL
@@ -53,12 +51,11 @@ module Common =
         GL.Ext.GenFramebuffers(1, &fboId)
         GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboId)
         GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, int tex_output, 0)
-        use b = new Bitmap(size.X, size.Y)
-        let bits = b.LockBits(System.Drawing.Rectangle(0, 0, size.X, size.Y), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-        GL.ReadPixels(0, 0, size.X, size.Y, PixelFormat.Bgra, PixelType.UnsignedByte, bits.Scan0)
+        let bytes : byte array = Array.zeroCreate (size.X * size.Y * 4) 
+        GL.ReadPixels(0, 0, size.X, size.Y, PixelFormat.Bgra, PixelType.UnsignedByte, bytes)
         GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
         GL.Ext.DeleteFramebuffers(1, &fboId)
-        b.UnlockBits(bits)
+        use b = Image<Rgba32>.Load(bytes)
         let file = FileInfo(path)
         b.Save(file.FullName)
         printfn $"Saved to {file.FullName}"

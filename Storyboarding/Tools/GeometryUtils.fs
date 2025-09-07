@@ -162,7 +162,7 @@ module GeometryUtils =
 
     let openingLine ts fin diff f t width =
         let te = ts + diff
-        let dist = length (f --- t) |> float32 |> (*) 0.032f
+        let dist = length (f --- t) |> float32 |> (*) 0.0325f
         let angle = - (angle (f --- t))
         img (square_white |> resize1To 32) >> coords f >> origin TopCentre
         >>= rotate ts ts angle angle

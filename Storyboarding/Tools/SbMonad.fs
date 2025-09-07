@@ -6,6 +6,7 @@ open MapsetParser.objects
 open SbTypes
 open Resources
 open System.IO
+open SixLabors.ImageSharp
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
 
@@ -128,7 +129,7 @@ module SbMonad =
 
     let scaleAsBg timeStart timeStop (sb : SB) =
         let s = sb.sprites |> Seq.head
-        let image = Image.FromFile(Path.Join(resourcesFolder, s.name))
+        use image = Image.Load(Path.Join(resourcesFolder, s.name))
         let w = 850f / (float32 image.Width)
         scale timeStart timeStop w w sb
 

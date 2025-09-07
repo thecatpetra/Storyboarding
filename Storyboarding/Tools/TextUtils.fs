@@ -2,6 +2,7 @@
 
 open System.Diagnostics
 open System.IO
+open SixLabors.ImageSharp
 open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.Paths
 open Storyboarding.Tools.SbTypes
@@ -44,8 +45,8 @@ module TextUtils =
     type CharAction = int -> string -> float32 -> Position -> T
     type TextEffect = Time -> CharAction
 
-    let imageWidth path =
-        let image = Image.FromFile(path)
+    let imageWidth (path : string) =
+        use image = Image.Load(path)
         image.Width
 
     let addX (x, y) b = (x + (int32 b), y)
