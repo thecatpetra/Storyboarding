@@ -24,11 +24,26 @@ module SbCompiler =
         ) in {sb with sprites = sprites}, m
 
     let mutable counter = 0
-    let rule (x: string) =
+    
+    let brainRotRule (x: string) =
+        let ext = x.Split(".") |> Seq.last
+        counter <- counter + 1
+        let words = ["skibidi"; "gyatt"; "sigma"; "rizz"; "tralala"; "tung"; "sahur"; "ocaml"; "pro"; "lord"; "hawk"; "tuah"; "goon"; "mewing"; "ohio"; "ligma"]
+        let l = Seq.length words
+        let rec name c =
+            match c with
+            | 0 -> ""
+            | n -> (List.item (n % l) words) + (name (n / l))
+        $"{name counter}.{ext}"
+    
+    let liliRule (x: string) =
         let ext = x.Split(".") |> Seq.last
         counter <- counter + 1
         let name = Convert.ToString(counter, 2).Replace("0", "I").Replace("1", "l")
         $"{name}.{ext}"
+
+    let rule (x: string) =
+        brainRotRule x
 
     let ensureFiles (sb : SB) =
         let mapDirectory = FileInfo(sb.path).DirectoryName

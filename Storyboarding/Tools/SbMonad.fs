@@ -118,7 +118,6 @@ module SbMonad =
     let scale = iBasic<float32> InstructionType.Scale
     let vectorScale = iBasic<fPosition> InstructionType.VectorScale
     let color = iBasic<Color> InstructionType.Color
-    let blur = iBasic<float32> InstructionType.Blur
     let easing e = applyToLastSimpleInstruction (fun i -> SimpleInstruction {i with easing = e })
     let layer l = applyToLastSprite (fun i -> {i with layer = l })
     let origin o = applyToLastSprite (fun i -> {i with origin = o })

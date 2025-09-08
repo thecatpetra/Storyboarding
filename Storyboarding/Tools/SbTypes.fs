@@ -38,8 +38,6 @@ module SbTypes =
         | Parameter
         | Fade
         | Color
-        | Blur
-        | GrayScale
 
     type Time = int
 

@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastDrawing", "FastDrawing\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GpuDrawingUtils", "GpuDrawingUtils\GpuDrawingUtils.fsproj", "{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StoryboardRenderer", "StoryboardRenderer\StoryboardRenderer.fsproj", "{F72D52C9-D71A-48AA-A526-6EF6551C2D4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LadaEngine", "..\LadaEngine\src\LadaEngine\LadaEngine.csproj", "{D77418C5-39CF-4F1B-BAD9-8790DA1E9AB4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97CA6CD6-B648-4A0C-AF17-FCBC70F526A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F72D52C9-D71A-48AA-A526-6EF6551C2D4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F72D52C9-D71A-48AA-A526-6EF6551C2D4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F72D52C9-D71A-48AA-A526-6EF6551C2D4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F72D52C9-D71A-48AA-A526-6EF6551C2D4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D77418C5-39CF-4F1B-BAD9-8790DA1E9AB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D77418C5-39CF-4F1B-BAD9-8790DA1E9AB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D77418C5-39CF-4F1B-BAD9-8790DA1E9AB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D77418C5-39CF-4F1B-BAD9-8790DA1E9AB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
