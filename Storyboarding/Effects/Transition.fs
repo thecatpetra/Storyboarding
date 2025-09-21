@@ -59,12 +59,12 @@ module Transition =
         printfn $"Transition closing squares ({ts}/{te}/{openTime})"
         monadicMap [1..16] (fun y ->
         monadicMap [-3..24] (fun x ->
-        let ts = ts + y * 60 + x * 60 - 500
+        let ts = ts + y * 55 + x * 55 - 500
         let normalized = x |> float32 |> fun x -> (x + 3.5f) / 28f, y |> float32 |> (fun y -> (y - 0.5f) / 16f)
         img square_white >>= coords (x * 32 - 16, y * 32 - 16) >> layer Foreground
         >>= fade te (te + openTime) 1f 0f
         >>= scale ts te 0f 0.25f >> easing Easing.QuadIn
-        >>= color (te - 800) te (clr normalized) finalColor >> easing Easing.QuadIn
+        >>= color (te - 800) te (clr normalized) finalColor >> easing Easing.QuadOut
         )))
 
     let threeShuttingSquares ts openTime sb =

@@ -39,14 +39,14 @@ module HidamariNoUta =
                    (t "02:06:713", "陽だまりの中に"), (t "02:10:243", "映りこむ")
                    (t "02:13:772", $"あなたの{char 12131}きてた"), (t "02:17:301", "その証")]
 
-    do
-        let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
-        let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
-        createFontSubset fontPath all_text 128
-    do
-        let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
-        let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
-        createFontSubset fontPath all_text 128
+    // do
+    //     let all_text = $"%A{lyrics}%A{lyrics2}【アポル】陽だまりの詩 歌ってみた-Hidamari no UtaApol"
+    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notosans_jp).Name)
+    //     createFontSubset fontPath all_text 128
+    // do
+    //     let all_text = [$"長い　時間の中で…今も… "; "死ぬこと|の意味を|理解した|僕は"; "この世の|全てを|愛そう|と決めた"; "教えて|もらった|何もかも|全て"; "陽だまりの|中に|「ありがとう」と|響く…"] |> String.concat ""
+    //     let fontPath = Path.Join(fontsFolder, FileInfo(font_notoserif_jp).Name)
+    //     createFontSubset fontPath all_text 128
 
     let doubleChromoFlash a b c d =
         chromoFlash a b c d
@@ -58,7 +58,7 @@ module HidamariNoUta =
         background blurredAvg 0 (t "00:56:566")
         >> background blurredMax 0 (t "00:56:566")
         >>= fade (t "00:28:331") (t "00:56:566") 1f 0f
-        >>= MarchingSquares.withDisturbances 0 (t "00:56:566")
+        >>= MarchingSquares.waves 0 (t "00:56:566")
         >>= color (t "00:00:000") (t "00:38:919") (0, 0, 0) (192, 192, 192)
         >>= doubleChromoFlash (t "00:51:919") (t "00:56:566") (t "00:56:566") 300
         >> parallax (t "00:56:566") (t "01:24:360") [ "bg/hidamari/1_3.jpg", 6f; "bg/hidamari/1_2.png", 11f; "bg/hidamari/1_1.png", 20f ]
@@ -193,7 +193,7 @@ module HidamariNoUta =
         >> background blurredMax (t "05:08:919") (t "05:28:676")
         >>= fade (t "05:08:919") (t "05:28:676") 0f 1f
         >>= color (t "05:08:919") (t "05:28:676") (192, 192, 192) (0, 0, 0)
-        >>= MarchingSquares.withDisturbances (t "05:08:919") (t "05:28:676")
+        >>= MarchingSquares.waves (t "05:08:919") (t "05:28:676")
 
     let signature =
         let jpAuthor = "【アポル】"

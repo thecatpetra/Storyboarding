@@ -1,9 +1,10 @@
 ﻿namespace Storyboarding.Tools
 
+open System
 open System.IO
 
 module Paths =
-    let projectPath x = Path.Join(@"/Users/arthur/Documents/Storyboarding/Storyboarding", x)
+    let projectPath x = Path.Join(Environment.GetEnvironmentVariable("sb_project_path"), x)
 
     let soundPath = projectPath @"/Resources/sound/bonk_ex.wav"
     let resourcesFolder = projectPath @"/Resources/"

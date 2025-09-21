@@ -95,6 +95,10 @@ module TextUtils =
     let textCenter font txt charAction scale =
         let p = centreOfText font txt scale
         text font txt charAction p scale
+    
+    let textCenterX font txt charAction y scale =
+        let p, _= centreOfText font txt scale
+        text font txt charAction (p, y) scale
 
     let noEffect stay time diff icf : CharAction = fun i image s p ->
         let time, c = time + i * diff, icf i
@@ -163,10 +167,10 @@ module TextUtils =
             >>= alpha
         monadicMapi [-1f; 0f; 1f] (fun i e -> inner (colorOfIndex i) (stride * e))
 
-    let spinInOutMove stay diff time icf : CharAction = fun i image s p ->
+    let spinInOutMoveGeneric l stay diff time icf : CharAction = fun i image s p ->
         let effectTime = 200
         let c = icf i
-        img image
+        img image >> layer l
         >>= move (time + i * diff) (time + i * diff + effectTime) p p
         >>= vectorScale (time + i * diff) (time + effectTime + i * diff) (0f, s) (s, s)
         >> easing Easing.QuadOut
@@ -175,6 +179,8 @@ module TextUtils =
         >>= vectorScale (stay + time + i * diff) (time + effectTime + stay + i * diff) (s, s) (0f, s)
         >> easing Easing.QuadOut
         // >>= alpha
+    
+    let spinInOutMove = spinInOutMoveGeneric Layer.Background
 
     let flyInOutGeneric time icf tIn tOut tDiff = fun i image s p ->
         let d = ((SbRandom.randInt -3 3) - 3, (SbRandom.randInt 0 5) + 5)

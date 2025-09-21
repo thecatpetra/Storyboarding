@@ -28,13 +28,14 @@ module SbCompiler =
     let brainRotRule (x: string) =
         let ext = x.Split(".") |> Seq.last
         counter <- counter + 1
-        let words = ["skibidi"; "gyatt"; "sigma"; "rizz"; "tralala"; "tung"; "sahur"; "ocaml"; "pro"; "lord"; "hawk"; "tuah"; "goon"; "mewing"; "ohio"; "ligma"]
+        let words = ["skibidi"; "gyatt"; "sigma"; "rizz"; "shorts"; "yt"; "ocaml"; "pro"; "lord"; "hawk"; "tuah"; "goon"; "mewing"; "ohio"; "ligma"; "balls"]
         let l = Seq.length words
         let rec name c =
             match c with
-            | 0 -> ""
-            | n -> (List.item (n % l) words) + (name (n / l))
-        $"{name counter}.{ext}"
+            | 0 -> []
+            | n -> (List.item (n % l) words) :: (name (n / l))
+        let sep = "-"
+        $"{name counter |> fun n -> String.Join(sep, n)}.{ext}"
     
     let liliRule (x: string) =
         let ext = x.Split(".") |> Seq.last
@@ -43,7 +44,7 @@ module SbCompiler =
         $"{name}.{ext}"
 
     let rule (x: string) =
-        brainRotRule x
+            brainRotRule x
 
     let ensureFiles (sb : SB) =
         let mapDirectory = FileInfo(sb.path).DirectoryName

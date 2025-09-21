@@ -1,5 +1,6 @@
 ﻿namespace Storyboarding
 
+open System.IO
 open NAudio.Wave
 open Storyboarding.Storyboards
 open Storyboarding.Tools
@@ -10,6 +11,6 @@ module Program =
 
     [<EntryPoint>]
     let main args =
-        HidamariNoUta.make ()
+        Continuum.make ()
         signalSuccess()
         0

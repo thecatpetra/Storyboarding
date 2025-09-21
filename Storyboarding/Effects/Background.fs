@@ -68,3 +68,12 @@ module Background =
     let parallax (ts : Time) (te : Time) sprites =
         printfn $"Making parallax effect ({ts}/{te}/%A{sprites})"
         monadicMap sprites (fun (sprite, amplitude) -> background sprite ts te >> bgLayerMovement ts te amplitude 32)
+    
+    let bgMovementRotate (ts : Time) (te : Time) sb=
+        let beat = beatTime 60000 sb
+        let iterationTime = beat * 64
+        let rotateDiff = 0.03f
+        let iteration =
+            rotate 0 iterationTime (- rotateDiff) rotateDiff >> easing Easing.QuadInOut
+            >>= rotate iterationTime (2 * iterationTime) (rotateDiff) -rotateDiff >> easing Easing.QuadInOut
+        loopTimeEnd ts te iteration sb

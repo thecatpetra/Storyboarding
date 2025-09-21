@@ -1,5 +1,5 @@
-initialize:  The directive "TheSynthesis.fs" was run successfully
-0000000000:                11111111111111111         222222222222
+initialize:  The directive "Synthesis" was run successfully
+0000000000:                11111111111         222222222222
 
 
 18:23:01.180 |I| Loaded FLESH from [$e85h39, $e84h42]

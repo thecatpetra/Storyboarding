@@ -68,20 +68,22 @@ module Interpreter =
 
         inner program.iterations s |> List.filter isInstruction |> optimize [] None |> List.rev
 
-    let drawExpression ip ia ts te (program: LSystemProgram) =
+    let drawExpression ip ia ts te (program: LSystemProgram) iTime forkTime =
         let s = program.scale
-        let forkTime = 2500
-        let iTime = 10
         let fullExpr = resolveExpression program
         let f2i (x, y) = int x, int y
+        let clr t =
+            let x = (float32 (t - ts) |> fun x -> x / (float32 (te - ts))) |> max 0f |> min 1f
+            lerpColor (255, 255, 255) (240, 60, 90) x
         let rec inner mnd m p r t ti i =
             match i, m with
             | Forward n :: tl, _ ->
                 let np = p +++ (rotateByF r (s * (float32 n), 0f))
-                let mnd = mnd >>= openingLine t te (iTime * n * ti) (f2i p) (f2i np) 0.03f
+                let mnd = mnd >>= openingLine (t - 1) te (iTime * n * ti) (f2i p) (f2i np) 0.03f
                           >> easing Easing.None
-                          // >> alpha
-                          >>= fade t t 0.2f 0.2f
+                          >>= fade t t 0.5f 0.5f
+                          >>= fade (te - 1000) te 0.5f 0f
+                          >>= color t t (clr t) (clr t)
                 inner mnd m np r (t + iTime * n * ti) ti tl
             | Backward n :: tl, _ ->
                 let np = p --- (rotateByF r (s * (float32 n), 0f))

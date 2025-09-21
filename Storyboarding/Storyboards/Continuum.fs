@@ -4,6 +4,7 @@ open System
 open Storyboarding.Effects
 open Storyboarding.Effects.Background
 open Storyboarding.Effects.Growth
+open Storyboarding.Effects.MarchingSquares
 open Storyboarding.Tools
 open Storyboarding.Tools.ColorUtils
 open Storyboarding.Tools.GeometryUtils
@@ -15,9 +16,6 @@ open Storyboarding.Tools.SbTypes
 open Storyboarding.Tools.TextUtils
 open System.IO
 
-// It has become a custom for storyboarders to add source code
-// Of the given map as a representation of some "code"
-// I will not deviate
 module Continuum =
     let macPath = @"/private/var/folders/pt/x9vg_x6s3pd5x6g8_33lbv500000gn/T/e039fa9473856437c9e5ac02221091450668067e1eefbce0fd2645d22e865279/Kardashev - Continuum (me2u).osb"
     let path = @"D:\D\osu!\Songs\2423610 Kardashev - Continuum\Kardashev - Continuum (me2u).osb"
@@ -25,8 +23,8 @@ module Continuum =
     let white = fun _ -> (240, 240, 255)
     let just color = indexedSolid color 10000 |> toFun
     let black = fun _ -> (2, 4, 10)
-    let red x = indexedGradientT (255, 40, 80) (255, 80, 40) x |> toFun
-    let redT = indexedGradientT (255, 40, 80) (255, 80, 40)
+    let red x = indexedGradientT (255, 130, 130) (255, 140, 80) x |> toFun
+    let redT = indexedGradientT (255, 130, 130) (255, 140, 80)
     let whiteI = indexedSolid (white ())
     
     let mainfont = font_forum
@@ -63,7 +61,7 @@ module Continuum =
             let w = textWidth mainfont l 0.3f |> (-) 550f |> int |> (+) w
             text mainfont l effect (w, h) 0.3f
         monadicMap lyrics line
-        >>= openingLine (t "00:52:917") (t "00:62:917") 800 (552, 107) (552, 175) 0.04f
+        >>= openingLine (t "00:52:917") (t "00:62:917") 800 (554, 107) (554, 175) 0.04f
 
     let renderLyrics3 ts =
         let te = ts + (t "01:14:735") + 3000 - (t "01:06:281")
@@ -81,8 +79,8 @@ module Continuum =
         monadicMap lyrics line
 
     let renderCode ts te =
-        let source = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication.fs_nolint"
-        let colors = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication.colors.fs_nolint"
+        let source = @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/code/self replication.fs_nolint"
+        let colors = @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/code/self replication.colors.fs_nolint"
         // ['1', (30, 60, 120); '3', (40, 120, 30); '2', (90, 50, 80); '4', (90, 50, 128); '5', (64, 64, 64)]
         let icf = icfOfFile colors (dict ['1', (92, 169, 247)
                                           '3', (85, 230, 138)
@@ -90,9 +88,9 @@ module Continuum =
                                           '4', (195, 122, 255)
                                           '5', (204, 212, 219)]) (209, 209, 209) |> toFun
         let lyrics = File.ReadAllLines(source) |> Seq.toList
-        let fontDir = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/font/JetBrainsMono-Light.ttf/"
+        let fontDir = @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/font/JetBrainsMono-Light.ttf/"
         let symbols = Directory.GetFiles(fontDir)
-                      |> Seq.map (_.Replace(@"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/", @""))
+                      |> Seq.map (_.Replace(@"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/", @""))
                       |> Seq.rev |> Seq.take 130
                       |> Seq.rev |> Seq.take 100
         let mutable collectedLength = 0
@@ -121,35 +119,34 @@ module Continuum =
             let effect = effect 35 (ts + 500 * i) te (withCollectedLength icf)
             text font_jetbrains_mono txt effect (90, 168 + i * 15) 0.15f
         monadicMapi lyrics line
-        >>= openingLine (t "00:52:917") (t "00:62:917") 800 (552, 107) (552, 175) 0.04f
 
     let thisProcessWillMirror =
         Transition.closingSquares (t "01:03:917") (t "01:05:735") 1000 (bg_snow_mountain |> applyShader "colorswap_br.frag") (192, 192, 200)
         >> img (bg_fern |> applyShader "colorswap_gr.frag")
-        >>= scale (t "01:05:735") (t "01:31:917") 0.45f 0.45f
+        >>= scale (t "01:05:735") (t "01:31:917") 0.5f 0.5f
         >>= rotate (t "01:05:735") (t "01:31:917") -0.1f 0.1f
         >>= growingVineBreadth (t "01:05:735") (t "01:31:917") (ResizeArray<Segment>()) (675, 430) (140, 120, 80)
-        >>= bgMovement (t "01:05:735") (t "01:31:917")
+        >>= bgMovementRotate (t "01:05:735") (t "01:31:917")
         >>= renderLyrics3 (t "01:06:281")
         >>= renderLyrics3 (t "01:19:372")
         >>= renderCode (t "01:18:826") (t "01:31:099")
         >>= AscendingParticles.fastEffect (t "01:18:826") (t "01:31:099") dot false (lerpColor (150, 80, 10) (250, 160, 20))
         >>= Transition.threeShuttingSquares (t "01:31:099") 400
-        // TODO: Cool effects all over the screen (localized)
+        >>= fractalLSystem (50f, 480f) -1.2f (t "01:06:281") (t "01:18:281") @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/code/fractal_hexagon.lsystem" 10 400
 
     let initiateTheProcess =
         let noEffectWithLoading j stay time diff icf : CharAction = fun i image s p ->
             let endTime = time + stay
             let time, c = time + i * diff, icf i
             let folder = image.Replace(FileInfo(image).Name, "")
-            if image.EndsWith("/43.png") then
+            if image.EndsWith("\\43.png") then
                 let switchTime = time + ((i - 28) * 60) + j * 600
-                img (folder + "/45.png")
+                img (folder + "\\45.png")
                 >>= move time time p p
                 >>= scale time time s s
                 >>= color time time c c
                 >>= fade time switchTime 1f 1f
-                >> img (folder + "/61.png")
+                >> img (folder + "\\61.png")
                 >>= move switchTime switchTime p p
                 >>= scale switchTime switchTime s s
                 >>= color switchTime switchTime (217, 213, 132) (217, 213, 132)
@@ -162,13 +159,13 @@ module Continuum =
                 >>= fade time (endTime) 1f 1f
         let firstCmd = [
             t "01:31:917", "./initiate ", just (255, 193, 122)
-            t "01:33:281", "\"TheSynthesis.fs\" ", just (227, 245, 255)
+            t "01:33:281", "\"TheSynthesis\" ", just (227, 245, 255)
             t "01:34:917", "--of ", just (255, 193, 122)
             t "01:35:190", "\"FLASH.dat\" ", just (227, 245, 255)
             t "01:36:826", "--and ", just (255, 193, 122)
             t "01:37:126", "\"TECHNOLOGY.dat\"", just (227, 245, 255)
         ]
-        let logFile = @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/self replication log.txt"
+        let logFile = @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/code/self replication log.txt"
         let colors = dict ['0', (255, 193, 122); '1', (227, 245, 255); '2', (118, 227, 149); '3', (162, 168, 171); '4', (217, 213, 132); '5', (170, 30, 40)]
         let log = textAndIcfsOfFile logFile colors (114, 120, 122)
         let ts, te = t "01:31:917", t "01:47:190"
@@ -183,6 +180,7 @@ module Continuum =
             text font_jetbrains_mono txt effect (48, 100 + 20 * i) 0.2f
         let i = bg_snow_mountain |> applyShader "colorswap_br.frag"
         background i ts (t "01:47:190")
+        >>= color ts ts (128, 128, 128) (128, 128, 128)
         >>= monadicMapi firstCmd line
         >>= monadicMapi log logLine
         >>= backgroundRaw screen_overlay ts (t "01:47:190")
@@ -191,18 +189,21 @@ module Continuum =
 
     let firstPart =
         background bg_snow_mountain 0 (t "00:52:644")
-        >>= bgMovementSlow 0 (t "00:52:644")
+        >>= bgMovementRotate 0 (t "00:52:644")
         >>= renderLyrics1
         >>= growingVineBreadth (t "00:47:463") (t "00:51:008") (ResizeArray<Segment>()) (320, 240) (255, 180, 160)
         >>= Transition.blackCurtains (t "00:50:644") (t "00:52:644") (t "00:52:644") (t "00:54:735")
         >> background (bg_snow_mountain |> applyShader "colorswap_br.frag") (t "00:52:644")  (t "01:05:735")
-        >>= bgMovementSlow (t "00:52:644") (t "01:05:735")
+        >>= bgMovementRotate (t "00:52:644") (t "01:05:735")
         >>= renderLyrics2
         >>= growingVineBreadth (t "00:59:190") (t "01:04:099") (ResizeArray<Segment>()) (456, 162) (255, 180, 160)
         >>= RealisticSnow.effect 0 (t "01:04:735")
+        >>= background (bg_snow_mountain |> gaussBlur 10f) 0 (t "00:34:918")
+        >>= bgMovementRotate 0 (t "00:34:918")
+        >>= color 0 (t "00:34:918") (0, 0, 0) (255, 255, 255)
+        >>= fade 0 (t "00:34:918") 1f 0f
 
     let theTheoryOfInfiniteLifelessness =
-        // TODO: FIX FADING OF VINE!!!
         let lyrics1 = [
             t "01:48:008", "The theory", 0, white
             t "01:50:190", "of infinite lifelessness", 1, (whiteI 3 >>>> redT "infinite lifelessness") |> toFun
@@ -216,42 +217,128 @@ module Continuum =
             t "02:17:734", "opportunity", 10, red "opportunity"
         ]
         let line (ts, l, h, icf) =
-            let te = t "02:21:552"
+            let te = t "02:19:552"
             let effect = spinInOutMove (te - ts) 35 ts icf
             let w = textWidth mainfont l 0.3f |> (/) 2f |> int |> (+) 96
             text mainfont l effect (w, 115 + 25 * h) 0.3f
-        background bg_snow_mountain (t "01:47:190") (t "02:35:188")
-        >>= bgMovementSlow (t "01:47:190") (t "02:35:188")
+        background bg_snow_mountain (t "01:47:190") (t "02:21:467")
+        >>= bgMovementRotate (t "01:47:190") (t "02:35:188")
         >>= monadicMap [0..1] (fun _ -> RealisticSnow.effect (t "01:42:281") (t "02:35:188"))
         >>= monadicMap (lyrics1 @ lyrics2) line
-        >>= openingLine (t "01:48:008") (t "02:21:552") 800 (90, 105) (90, 150) 0.04f
-        >>= openingLine (t "01:56:734") (t "02:21:552") 800 (90, 180) (90, 225) 0.04f
-        >>= openingLine (t "02:05:461") (t "02:21:552") 800 (90, 255) (90, 300) 0.04f
-        >>= openingLine (t "02:05:461") (t "02:21:552") 800 (90, 330) (90, 375) 0.04f
-        >>= growingVineBreadth (t "01:48:008") (t "02:21:552") (ResizeArray<_>()) (0, 0) (255, 180, 160)
-        >>= fractalLSystem (600f, 480f) (-MathF.PI / 2f - 1.5f) (t "01:48:008") (t "02:21:552") @"/Users/arthur/Documents/Storyboarding/Storyboarding/Resources/code/fractal_tree2.lsystem"
-
+        >>= openingLine (t "01:48:008") (t "02:19:552") 800 (90, 105) (90, 150) 0.04f
+        >>= openingLine (t "01:56:734") (t "02:19:552") 800 (90, 180) (90, 225) 0.04f
+        >>= openingLine (t "02:05:461") (t "02:19:552") 800 (90, 255) (90, 300) 0.04f
+        >>= openingLine (t "02:14:461") (t "02:19:552") 800 (90, 330) (90, 375) 0.04f
+        >>= growingVineBreadth (t "01:48:008") (t "02:21:552") (ResizeArray<_>()) (30, 30) (130, 100, 160)
+        >>= fractalLSystem (600f, 480f) (-MathF.PI / 2f - 1.5f) (t "01:48:008") (t "02:21:552") @"/Users/arthu/Documents/Storyboarding/Storyboarding/Resources/code/fractal_tree2.lsystem" 10 2500
+        >>= Transition.blackCurtains (t "02:20:189") (t "02:22:098") (t "02:22:098") (t "02:24:370")
 
     let intro =
-        // In small rectangle mapper storyboarder
-        // Plant growing from the edge (600 480)
-        // Gradually color from 60 60 60 to 200 200 200
-        id
+        let ts, te = 322, 14332
+        text mainfont "Kardashev - Continuum" (spinInOutMove (te - ts) 35 ts white) (570, 415) 0.2f
+        >>= text mainfont "Mapper: me2u" (spinInOutMove (te - ts) 35 ts white) (570, 430) 0.2f
+        >>= text mainfont "Storyboard: TheCatPetra" (spinInOutMove (te - ts) 35 ts white) (570, 445) 0.2f
+        >>= fractalLSystem (515f, 430f) (0.523599f) ts te @"C:\Users\arthu\Documents\Storyboarding\Storyboarding\Resources\code\fractal_test.lsystem" 30 60
+        
+        
+    // 02:21:467 - 02:35:188 (red bg, usual everything)
+    let systemsOfExploration =
+        let lyrics1 = [
+            t "02:22:370", "System of exploration", white, 115, 0
+            t "02:24:825", "Now have precedence", white, 140, 0
+            t "02:26:734", "In light of all evidence", white, 165, 0
+        ]
+        let line (ts, l, icf, h, w) =
+            let te = t "02:28:916"
+            let effect = spinInOutMove (te - ts) 35 ts icf
+            let w = textWidth mainfont l 0.3f |> (-) 550f |> int |> (+) w
+            text mainfont l effect (w, h) 0.3f
+        let theyAreNotAlone =
+            let ts, te = (t "02:28:916"), (t "02:33:552")
+            let txt = "They are not alone"
+            textCenter mainfont txt (spinInOutMove (te - ts) 35 ts (redT txt |> toFun)) 0.6f
+            
+        background (bg_snow_mountain |> applyShader "colorswap_br.frag") (t "02:22:098") (t "02:35:188")
+        >>= monadicMap lyrics1 line
+        >>= openingLine (t "02:22:370") (t "02:28:734") 800 (554, 107) (554, 175) 0.04f
+        >>= theyAreNotAlone
+        >>= growingVineBreadth (t "02:28:916") (t "02:35:188") (ResizeArray()) (320, 240) (250, 90, 60)
+    
+    let theProgrammersOfTheirOwnFate =
+        let lyrics = [
+            t "02:35:188", "They", white, 0, None
+            t "02:37:643", "are the programmers", white, 0, Some 140
+            t "02:39:279", "Of their own fate", white, 1, None
+            t "02:42:552", "Outside the powers of", white, 2, None
+            t "02:45:007", "Evolution", red "Evolution", 3, None
+        ]
+        let line (ts, txt, icf, i, x) =
+            let te = ts + 1500
+            textCenter font_jetbrains_mono txt (spinInOutMove (te - ts) 35 ts (icf)) 0.4f
+        Transition.blackCurtains (t "02:34:370") (t "02:35:188") (t "02:35:188") (t "02:37:188")
+        >>= background (bg_snow_mountain |> applyShader "colorswap_br.frag" |> gaussBlur 20f) (t "02:35:188") (t "02:48:279")
+        >>= monadicMap lyrics line
+        >>= life (t "02:35:188") (t "02:48:279")
+    
+    let pathfinderInitiative =
+        let effect ts = spinInOutMove 3000 35 ts white
+        let effect2 ts = spinInOutMove 6000 70 ts (redT "Engineering" |> toFun)
+        background (bg_snow_mountain |> applyShader "colorswap_br.frag") (t "02:51:552") (t "03:15:278")
+        >>= color (t "02:51:552") (t "03:02:188") (0, 0, 0) (255, 255, 255)
+        >>= textCenter mainfont "Pathfinder initiative" (effect (t "02:51:552")) 0.4f
+        >>= textCenter mainfont "Mastery of bio-robotic" (effect (t "02:55:643")) 0.4f
+        >>= textCenter mainfont "Engineering" (effect2 (t "03:02:188")) 0.55f
+        >>= growingVineBreadth (t "03:02:188") (t "03:15:278") (ResizeArray<_>()) (0, 0) (172, 172, 192)
+    
+    let theyHavePlacedThemselves =
+        let lyrics = [
+            t "03:35:187", "They have placed themselves", white, 0
+            t "03:36:550", "Inside their creations", white, 1
+            t "03:38:459", "Through synthetic eyes", white, 2
+            t "03:39:823", "They have gained sight", whiteI 10 >>>> redT "gained sight" |> toFun, 3
+        ]
+        let line (ts, txt, icf, i) =
+            let te = ts + 1000
+            textCenter font_jetbrains_mono txt (spinInOutMove (te - ts) 35 ts (icf)) 0.4f
+        skip 2
+        background (bg_snow_mountain |> gaussBlur 20f) (t "03:28:368") (t "03:41:459")
+        >>= bgMovementRotate (t "03:28:368") (t "03:41:459")
+        >>= RealisticSnow.effect (t "03:15:278") (t "03:28:368")
+        >>= Transition.blackCurtains (t "03:26:732") (t "03:28:368") (t "03:28:368") (t "03:30:368")
+        >>= lifeBlue (t "03:28:368") (t "03:41:459")
+        >>= monadicMap lyrics line
+        >>= background (bg_snow_mountain) (t "03:15:278") (t "03:28:368")
+        >>= bgMovementRotate (t "03:15:278") (t "03:28:368")
+        >>= color (t "03:15:278") (t "03:27:368") (0, 0, 0) (255, 255, 255)
+    
+    let theyReturnToThemselves =
+        let lyrics = [
+            t "03:41:732", "In exploring the galaxy", white, 0.4f
+            t "03:45:005", "They return to themselves", redT "They return to themselves" |> toFun, 0.5f
+        ]
+        let line (ts, txt, icf, i) =
+            let te = ts + 2000
+            textCenter font_jetbrains_mono txt (spinInOutMove (te - ts) 35 ts (icf)) i
+        background bg_space (t "03:41:459") (t "03:50:459")
+        >>= Transition.blackCurtains (t "03:40:368") (t "03:41:459") (t "03:41:459") (t "03:43:459")
+        >>= background (bg_space |> gaussBlur 10f) (t "03:41:459") (t "03:50:459")
+        >>= fade (t "03:41:459") (t "03:50:459") 0f 1f
+        >>= color (t "03:48:005") (t "03:50:459") (255, 200, 200) (20, 0, 0)
+        >>= monadicMap lyrics line
     
     let story =
         removeBg
         >>= firstPart
+        >>= intro
         >>= thisProcessWillMirror
+        >>= systemsOfExploration
         >>= theTheoryOfInfiniteLifelessness
         >>= initiateTheProcess
-        // 02:21:467 - 02:35:188 (red bg, usual everything)
-        // 02:35:188 - 02:48:279 (shaking red bg, like in other sb)
-        // 02:48:279 - 03:15:278 (game of life and blackish bg)
-        // 03:15:278 - 03:21:823 (some flower as in the opening, blue bg)
-        // 03:21:823 - 03:41:459 effects on notes (self replication)
-        // 03:41:459 - end red bg outro
-        // Somewhere planet
+        >>= theProgrammersOfTheirOwnFate
+        >>= pathfinderInitiative
+        >>= theyHavePlacedThemselves
+        >>= theyReturnToThemselves
         >>= background vignette 0 (t "03:54:397") >> layer Foreground
 
-    let make () = openSb macPath |> story |> SbCompiler.write
+    let make () = openSb path |> story |> SbCompiler.write
 

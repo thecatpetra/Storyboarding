@@ -31,6 +31,7 @@ module SbRandom =
     let samePosition () = prevPosition
     let sameColor () = prevColor
 
+    let skip n = Seq.iter (fun _ -> randInt 1 3 |> ignore) [1..n]
     let choice (set : 'a list) =
         List.item (List.length set |> rng.Next) set
 

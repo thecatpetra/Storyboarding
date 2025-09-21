@@ -32,11 +32,11 @@ module ImageFilters =
         let imageFileInfo = FileInfo(fullPath)
         let localPath = Path.GetFileNameWithoutExtension(fullPath) + $"{suffix}{imageFileInfo.Extension}"
         let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
-        if File.Exists(newFilename) then newFilename.Replace(Paths.resourcesFolder, "")
+        if File.Exists(newFilename) then newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
         else use image = Image.Load(fullPath)
              f image
              image.Save(newFilename)
-             newFilename.Replace(Paths.resourcesFolder, "")
+             newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
 
     let makeNewImage suffix path (f: Image -> Image) =
         let fullPath = Path.Join(Paths.resourcesFolder, path)
@@ -46,7 +46,7 @@ module ImageFilters =
         use image = Image.Load(fullPath)
         let r = f image
         r.Save(newFilename)
-        newFilename.Replace(Paths.resourcesFolder, "")
+        newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
 
     let makeNewImageNoSave suffix path (f: Image<Rgba32> -> String -> Unit) : String =
         let fullPath = Path.Join(Paths.resourcesFolder, path)
@@ -55,7 +55,7 @@ module ImageFilters =
         let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
         use image = Image.Load<Rgba32>(fullPath)
         if not <| File.Exists(newFilename) then f image newFilename
-        newFilename.Replace(Paths.resourcesFolder, "")
+        newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
 
     let commonFilter (filter : ImageFilter) suffix path =
         doOnImage suffix path (_.Mutate(filter))
@@ -139,7 +139,7 @@ module ImageFilters =
         let newFilename = Path.Join(imageFileInfo.DirectoryName, localPath)
         if File.Exists(newFilename) then
             let size = readCached $"OFFSET OF {newFilename}" |> _.Split(", ") |> Seq.map int |> Seq.toList |> (fun [a; b] -> a, b)
-            size, newFilename.Replace(Paths.resourcesFolder, "")
+            size, newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
         else
             use g = Image.Load<Rgba32>(fullPath)
             let mutable minX = g.Width - 1
@@ -156,7 +156,7 @@ module ImageFilters =
             g.Mutate(fun g -> g.Crop(Rectangle(Point(minX, minY), Size(maxX - minX, maxY - minY))) |> ignore)
             g.Save(newFilename)
             writeToCache $"OFFSET OF {newFilename}" $"{minX}, {minY}"
-            (minX, minY), newFilename.Replace(Paths.resourcesFolder, "")
+            (minX, minY), newFilename.Replace("\\", "/").Replace(Paths.resourcesFolder, "")
 
     let renderTextToImage text anyImage size =
         failwith "TODO"

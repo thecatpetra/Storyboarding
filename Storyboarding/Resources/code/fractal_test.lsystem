@@ -1,4 +1,5 @@
 Axiom X
 Angle 60.0
-Distance 32.0
-F -> F + F + F + F
+Iterations 1
+Scale 6.2
+X -> XF-YF-XF+YF+XF+YF+XF-YF-XF-YF+XF+YF-XF-YF-XF-YF+XF+YF-XF-YF-XF+YF+XF+YF+XF-YF-XF 

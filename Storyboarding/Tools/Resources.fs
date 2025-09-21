@@ -54,6 +54,7 @@ module Resources =
     let bg_isolation = qhd "bg/5ZqBg.jpg"
     let bg_leaves = qhd "bg/leaves.jpg"
     let bg_fern = fhd "bg/fern.jpg"
+    let bg_space = fhd "bg/vadim-sadovski-j45.jpg"
 
     let bg_hidamari_1 = "bg/hidamari/1.jpg"
     let bg_hidamari_2 = "bg/hidamari/2.jpg"

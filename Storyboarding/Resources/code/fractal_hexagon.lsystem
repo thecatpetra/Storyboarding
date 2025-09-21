@@ -1,6 +1,6 @@
 Axiom F + F + F
 Angle 60.0
-Iterations 6
+Iterations 5
 Scale 5.0
 X -> [ - F + F + F ] + F - F - F +
 F -> F X F
